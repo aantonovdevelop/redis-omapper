@@ -121,4 +121,27 @@ describe('Repository', function () {
             });
         })
     });
+
+    describe('#delete', function () {
+        it('Should delete object from db', function (done) {
+            redis.store = [];
+
+            var test_schema = {
+                id: 1,
+                name: 'test_schema'
+            };
+
+            redis.store['testmodel:info:' + test_schema.id] = JSON.stringify(test_schema);
+
+            var repository = new Repository(TestModel, redis);
+
+            repository.delete(test_schema.id).then(function () {
+                assert.equal(redis.store['testmodel:info:' + test_schema.id], undefined);
+
+                done();
+            }).catch(function (err) {
+                done(err);
+            });
+        });
+    })
 });

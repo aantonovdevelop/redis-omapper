@@ -75,7 +75,7 @@ function Repository (model, redis) {
         var self = this;
 
         return new Promise(function (resolve, reject) {
-            redis.rem(self.key + id, function (err) {
+            redis.del(self.key + id, function (err) {
                 if (err) reject(err);
 
                 resolve();
