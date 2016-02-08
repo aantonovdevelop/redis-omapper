@@ -70,5 +70,36 @@ describe('Repository', function () {
                 done();
             });
         });
+
+        it('Should update object in db', function (done) {
+            redis.store = [];
+
+            var test_schema_id = 1;
+
+            var test_schema = {
+                id: test_schema_id,
+                name: 'test_schema'
+            };
+
+            var updated_test_schema = {
+                id: test_schema_id,
+                name: 'updated_test_schema'
+            };
+
+            redis.store['testmodel:info:' + test_schema_id] = JSON.stringify(test_schema);
+
+            var repository = new Repository(TestModel, redis);
+
+            repository.save(new TestModel(updated_test_schema)).then(function (id) {
+                assert.equal(id, test_schema_id);
+
+                assert.equal(JSON.parse(redis.store['testmodel:info:' + test_schema_id]).id, test_schema_id);
+                assert.equal(JSON.parse(redis.store['testmodel:info:' + test_schema_id]).name, updated_test_schema.name);
+
+                done();
+            }).catch(function (err) {
+                done(err);
+            });
+        });
     });
 });
