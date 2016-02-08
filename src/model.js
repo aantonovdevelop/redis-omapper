@@ -5,7 +5,7 @@ function Model() {
         var self = this;
         var result = true;
 
-        Object.keys(self.scheme).forEach(function (item) {
+        Object.keys(self.schema).forEach(function (item) {
             if (self.fields.indexOf(item) < 0) {
                 result = false;
             }

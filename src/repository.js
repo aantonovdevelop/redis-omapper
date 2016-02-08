@@ -1,6 +1,6 @@
 function Repository (model, redis) {
 
-    this.key = model.key || (model.constructor.name.toLowerCase() + ':info:');
+    this.key = model.key || (model.name.toLowerCase() + ':info:');
 
     this.get = function (id) {
         var self = this;
@@ -9,7 +9,9 @@ function Repository (model, redis) {
             redis.get(self.key + id, function (err, schema) {
                 if (err) reject(err);
 
-                resolve(JSON.parse(schema));
+                var result_model = new model(JSON.parse(schema));
+
+                resolve(result_model);
             });
         });
     };
@@ -18,12 +20,14 @@ function Repository (model, redis) {
         var self = this;
 
         function get_id(callback) {
-            if (!model.id) {
+            if (!model.schema.id) {
                 redis.incr(self.key + ':next_id', function (err, id) {
+                    model.schema.id = id;
+
                     callback(err, id);
                 });
             } else {
-                callback(null, model.id);
+                callback(null, model.schema.id);
             }
         }
 

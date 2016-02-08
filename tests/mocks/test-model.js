@@ -2,10 +2,10 @@
 
 var Model = require('../../src/model');
 
-function TestModel(scheme) {
+function TestModel(schema) {
     this.fields = ['id', 'name'];
 
-    this.scheme = scheme;
+    this.schema = schema;
 }
 
 TestModel.prototype = new Model();
