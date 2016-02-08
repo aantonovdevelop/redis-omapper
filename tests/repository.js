@@ -101,5 +101,24 @@ describe('Repository', function () {
                 done(err);
             });
         });
+
+        it('Should fail update because updated object not exist', function (done) {
+            redis.store = [];
+
+            var test_schema = {
+                id: 1,
+                name: 'test_schema'
+            };
+
+            var repository = new Repository(TestModel, redis);
+
+            repository.save(new TestModel(test_schema)).then(function () {
+                done(new Error('Must be done with error'));
+            }).catch(function (err) {
+                assert.equal(err.message, 'Updating object not exist');
+
+                done();
+            });
+        })
     });
 });

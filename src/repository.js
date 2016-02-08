@@ -18,7 +18,31 @@ function Repository (model, redis) {
 
     this.save = function (model) {
         var self = this;
+        var isUpdate = false;
 
+        return new Promise(function (resolve, reject) {
+            if (!model.checkFields()) reject(new Error('Wrong schema'));
+
+            get_id(function (err, id) {
+                if (err) reject(err);
+
+                if (isUpdate) {
+                    check_updating_object_existing(id, function (err, isExist) {
+                        if (!isExist) reject(new Error('Updating object not exist'));
+
+                        save_or_update(id, model.schema, return_result)
+                    });
+                } else {
+                    save_or_update(id, model.schema, return_result);
+                }
+            });
+
+            function return_result(err, id) {
+                if (err) reject(err);
+
+                resolve(id);
+            }
+        });
 
         function get_id(callback) {
             if (!model.schema.id) {
@@ -28,6 +52,8 @@ function Repository (model, redis) {
                     callback(err, id);
                 });
             } else {
+                isUpdate = true;
+
                 callback(null, model.schema.id);
             }
         }
@@ -38,20 +64,11 @@ function Repository (model, redis) {
             });
         }
 
-        return new Promise(function (resolve, reject) {
-
-            if (!model.checkFields()) reject(new Error('Wrong schema'));
-
-            get_id(function (err, id) {
-                if (err) reject(err);
-
-                save_or_update(id, model.schema, function (err, id) {
-                    if (err) reject(err);
-
-                    resolve(id);
-                });
+        function check_updating_object_existing(id, callback) {
+            redis.exists(self.key + id, function (err, isExist) {
+                callback(err, isExist);
             });
-        });
+        }
     };
 
     this.delete = function (id) {
