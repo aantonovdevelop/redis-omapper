@@ -19,6 +19,7 @@ function Repository (model, redis) {
     this.save = function (model) {
         var self = this;
 
+
         function get_id(callback) {
             if (!model.schema.id) {
                 redis.incr(self.key + ':next_id', function (err, id) {
@@ -38,6 +39,9 @@ function Repository (model, redis) {
         }
 
         return new Promise(function (resolve, reject) {
+
+            if (!model.checkFields()) reject(new Error('Wrong schema'));
+
             get_id(function (err, id) {
                 if (err) reject(err);
 

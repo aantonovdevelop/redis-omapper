@@ -51,5 +51,24 @@ describe('Repository', function () {
                 done(err);
             });
         });
+
+        it('Should return error because schema is invalid', function (done) {
+            redis.store = [];
+
+            var test_schema = {
+                wrong_field: 'test_schema'
+            };
+
+            var repository = new Repository(TestModel, redis);
+            var test_model = new TestModel(test_schema);
+
+            repository.save(test_model).then(function () {
+                done(new Error('Must be done with error'));
+            }).catch(function (err) {
+                assert.equal(err.message, 'Wrong schema');
+
+                done();
+            });
+        });
     });
 });
