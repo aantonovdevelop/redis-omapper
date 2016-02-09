@@ -35,6 +35,7 @@ describe('Repository', function () {
             redis.store = [];
 
             var test_schema = {
+                company_id: 1,
                 name: 'test_schema'
             };
 
@@ -78,11 +79,13 @@ describe('Repository', function () {
 
             var test_schema = {
                 id: test_schema_id,
+                company_id: 1,
                 name: 'test_schema'
             };
 
             var updated_test_schema = {
                 id: test_schema_id,
+                company_id: 1,
                 name: 'updated_test_schema'
             };
 
@@ -107,6 +110,7 @@ describe('Repository', function () {
 
             var test_schema = {
                 id: 1,
+                company_id: 1,
                 name: 'test_schema'
             };
 

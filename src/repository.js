@@ -1,3 +1,5 @@
+var async = require('async');
+
 function Repository (model, redis) {
 
     this.key = model.key || (model.name.toLowerCase() + ':info:');
@@ -21,14 +23,14 @@ function Repository (model, redis) {
         var isUpdate = false;
 
         return new Promise(function (resolve, reject) {
-            if (!model.checkFields()) reject(new Error('Wrong schema'));
-
             get_id(function (err, id) {
                 if (err) reject(err);
 
+                if (!model.checkFields()) reject(new Error('Wrong schema'));
+
                 if (isUpdate) {
                     check_updating_object_existing(id, function (err, isExist) {
-                        if (!isExist) reject(new Error('Updating object not exist'));
+                        if (!isExist) return reject(new Error('Updating object not exist'));
 
                         save_or_update(id, model.schema, return_result)
                     });
