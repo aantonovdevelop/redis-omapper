@@ -32,10 +32,22 @@ function Repository (model, redis) {
                     check_updating_object_existing(id, function (err, isExist) {
                         if (!isExist) return reject(new Error('Updating object not exist'));
 
-                        save_or_update(id, model.schema, return_result)
+                        save_or_update(id, model.schema, function (err) {
+                            if (err) return reject(err);
+
+                            save_indexes(model.indexes, function (err) {
+                                return_result(err, id);
+                            });
+                        })
                     });
                 } else {
-                    save_or_update(id, model.schema, return_result);
+                    save_or_update(id, model.schema, function (err, id){
+                        if (err) return reject(err);
+
+                        save_indexes(model.indexes, function (err) {
+                            return_result(err, id);
+                        });
+                    });
                 }
             });
 
@@ -66,12 +78,26 @@ function Repository (model, redis) {
             });
         }
 
+        function save_indexes(indexes, callback) {
+
+            async.eachSeries(indexes, update_index, function (err) {
+                callback(err, null);
+            });
+
+            function update_index(index, callback) {
+                redis.sadd(index.key + model.schema[index.field], model.schema.id, function (err) {
+                    callback(err);
+                });
+            }
+        }
+
         function check_updating_object_existing(id, callback) {
             redis.exists(self.key + id, function (err, isExist) {
                 callback(err, isExist);
             });
         }
     };
+
 
     this.delete = function (id) {
         var self = this;
