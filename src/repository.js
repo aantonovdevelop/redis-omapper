@@ -26,7 +26,7 @@ function Repository (model, redis) {
             get_id(function (err, id) {
                 if (err) reject(err);
 
-                if (!model.checkFields()) reject(new Error('Wrong schema'));
+                if (!model.check_fields()) reject(new Error('Wrong schema'));
 
                 if (isUpdate) {
                     check_updating_object_existing(id, function (err, isExist) {

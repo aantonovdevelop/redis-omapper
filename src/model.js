@@ -1,7 +1,7 @@
 'use strict';
 
 function Model() {
-    this.checkFields = function () {
+    this.check_fields = function () {
         var self = this;
         var result = true;
 
