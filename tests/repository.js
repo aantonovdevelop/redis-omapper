@@ -4,7 +4,7 @@ var assert = require('assert');
 var redis = require('./mocks/redis');
 
 var Repository = require('../src/repository');
-var TestModel = require('./mocks/test-model');
+var test_model = require('./mocks/test-model');
 
 describe('Repository', function () {
 
@@ -15,13 +15,13 @@ describe('Repository', function () {
                 name: 'test_schema'
             };
 
-            redis.store['testmodel:info:' + test_schema.id] = JSON.stringify(test_schema);
+            redis.store[test_model.key + test_schema.id] = JSON.stringify(test_schema);
 
-            var repository = new Repository(TestModel, redis);
+            var repository = new Repository(test_model, redis);
 
             repository.get(test_schema.id).then(function(test_model) {
-                assert.equal(test_model.schema.id, test_schema.id);
-                assert.equal(test_model.schema.name, test_schema.name);
+                assert.equal(test_model.id, test_schema.id);
+                assert.equal(test_model.name, test_schema.name);
 
                 done();
             }).catch(function (err) {
@@ -39,16 +39,15 @@ describe('Repository', function () {
                 name: 'test_schema'
             };
 
-            var repository = new Repository(TestModel, redis);
-            var test_model = new TestModel(test_schema);
+            var repository = new Repository(test_model, redis);
 
-            repository.save(test_model).then(function (id) {
+            repository.save(test_schema).then(function (id) {
                 assert.equal(id, 1);
 
-                assert.equal(JSON.parse(redis.store[TestModel.name.toLowerCase() + ':info:' + id]).id, 1);
+                assert.equal(JSON.parse(redis.store[test_model.key + id]).id, 1);
 
                 test_model.indexes.forEach(function (item) {
-                    assert.equal(redis.store[item.key + test_model.schema[item.field]], test_model.schema.id);
+                    assert.equal(redis.store[item.key + test_model[item.field]], test_model.id);
                 });
 
                 done();
@@ -64,8 +63,7 @@ describe('Repository', function () {
                 wrong_field: 'test_schema'
             };
 
-            var repository = new Repository(TestModel, redis);
-            var test_model = new TestModel(test_schema);
+            var repository = new Repository(test_model, redis);
 
             repository.save(test_model).then(function () {
                 done(new Error('Must be done with error'));
@@ -95,9 +93,9 @@ describe('Repository', function () {
 
             redis.store['testmodel:info:' + test_schema_id] = JSON.stringify(test_schema);
 
-            var repository = new Repository(TestModel, redis);
+            var repository = new Repository(test_model, redis);
 
-            repository.save(new TestModel(updated_test_schema)).then(function (id) {
+            repository.save(updated_test_schema).then(function (id) {
                 assert.equal(id, test_schema_id);
 
                 assert.equal(JSON.parse(redis.store['testmodel:info:' + test_schema_id]).id, test_schema_id);
@@ -118,16 +116,16 @@ describe('Repository', function () {
                 name: 'test_schema'
             };
 
-            var repository = new Repository(TestModel, redis);
+            var repository = new Repository(test_model, redis);
 
-            repository.save(new TestModel(test_schema)).then(function () {
+            repository.save(test_schema).then(function () {
                 done(new Error('Must be done with error'));
             }).catch(function (err) {
                 assert.equal(err.message, 'Updating object not exist');
 
                 done();
             });
-        })
+        });
     });
 
     describe('#delete', function () {
@@ -141,7 +139,7 @@ describe('Repository', function () {
 
             redis.store['testmodel:info:' + test_schema.id] = JSON.stringify(test_schema);
 
-            var repository = new Repository(TestModel, redis);
+            var repository = new Repository(test_model, redis);
 
             repository.delete(test_schema.id).then(function () {
                 assert.equal(redis.store['testmodel:info:' + test_schema.id], undefined);

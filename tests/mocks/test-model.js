@@ -1,15 +1,13 @@
 'use strict';
 
-var Model = require('../../src/model');
+var test_model = {
+    key: 'testmodel:info:',
 
-function TestModel(schema) {
-    this.fields = ['id', 'name', 'company_id'];
+    fields: ['id', 'name', 'company_id'],
 
-    this.schema = schema;
+    indexes: [{field: 'company_id', key: 'company:company_models:'}],
 
-    this.indexes = [{field: 'company_id', key: 'company:company_models:'}];
-}
+    functions: []
+};
 
-TestModel.prototype = new Model();
-
-module.exports = TestModel;
+module.exports = test_model;

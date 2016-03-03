@@ -1,17 +1,18 @@
 var async = require('async');
 
-function Repository (model, redis) {
+var model_factory = require('./model-factory');
 
-    this.key = model.key || (model.name.toLowerCase() + ':info:');
+function Repository (model_schema, redis) {
+    this.model_schema = model_schema;
 
     this.get = function (id) {
         var self = this;
 
         return new Promise(function (resolve, reject) {
-            redis.get(self.key + id, function (err, schema) {
+            redis.get(self.model_schema.key + id, function (err, schema) {
                 if (err) reject(err);
 
-                var result_model = new model(JSON.parse(schema));
+                var result_model = model_factory(JSON.parse(schema), model_schema);
 
                 resolve(result_model);
             });
@@ -22,26 +23,30 @@ function Repository (model, redis) {
         var self = this;
         var isUpdate = false;
 
+        if (model.constructor.name !== 'Model') {
+            model = model_factory(model, this.model_schema);
+        }
+
         return new Promise(function (resolve, reject) {
             get_id(function (err, id) {
                 if (err) reject(err);
 
-                if (!model.check_fields()) reject(new Error('Wrong schema'));
+                if (!model.check_fields()) return reject(new Error('Wrong schema'));
 
                 if (isUpdate) {
                     check_updating_object_existing(id, function (err, isExist) {
                         if (!isExist) return reject(new Error('Updating object not exist'));
 
-                        save_or_update(id, model.schema, function (err) {
+                        save_or_update(id, model.to_object(), function (err) {
                             if (err) return reject(err);
 
                             save_indexes(model.indexes, function (err) {
                                 return_result(err, id);
                             });
-                        })
+                        });
                     });
                 } else {
-                    save_or_update(id, model.schema, function (err, id){
+                    save_or_update(id, model.to_object(), function (err, id) {
                         if (err) return reject(err);
 
                         save_indexes(model.indexes, function (err) {
@@ -59,21 +64,21 @@ function Repository (model, redis) {
         });
 
         function get_id(callback) {
-            if (!model.schema.id) {
-                redis.incr(self.key + ':next_id', function (err, id) {
-                    model.schema.id = id;
+            if (!model.id) {
+                redis.incr(self.model_schema.key + ':next_id', function (err, id) {
+                    model.id = id;
 
                     callback(err, id);
                 });
             } else {
                 isUpdate = true;
 
-                callback(null, model.schema.id);
+                callback(null, model.id);
             }
         }
 
         function save_or_update(id, schema, callback) {
-            redis.set(self.key + id, JSON.stringify(schema), function (err) {
+            redis.set(self.model_schema.key + id, JSON.stringify(schema), function (err) {
                 callback(err, id);
             });
         }
@@ -92,18 +97,17 @@ function Repository (model, redis) {
         }
 
         function check_updating_object_existing(id, callback) {
-            redis.exists(self.key + id, function (err, isExist) {
+            redis.exists(self.model_schema.key + id, function (err, isExist) {
                 callback(err, isExist);
             });
         }
     };
 
-
     this.delete = function (id) {
         var self = this;
 
         return new Promise(function (resolve, reject) {
-            redis.del(self.key + id, function (err) {
+            redis.del(self.model_schema.key + id, function (err) {
                 if (err) reject(err);
 
                 resolve();

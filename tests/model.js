@@ -2,13 +2,14 @@
 
 var assert = require('assert');
 
-var TestModel = require('./mocks/test-model');
+var test_model = require('./mocks/test-model');
+var model_factory = require('../src/model-factory');
 
 describe('Model', function () {
     describe('#check_fields', function () {
 
         it('Should check model fields and return true', function (done) {
-            var test = new TestModel({id: 1, name: 'test', company_id: 1});
+            var test = model_factory({id: 1, name: 'test', company_id: 1}, test_model);
 
             assert.equal(test.check_fields(), true);
 
@@ -16,7 +17,7 @@ describe('Model', function () {
         });
 
         it('Should check model fields and return false', function (done) {
-            var test = new TestModel({id: 1, company_id: 1, failed_name: 'test'});
+            var test = model_factory({id: 1, company_id: 1, failed_name: 'test'}, test_model);
 
             assert.equal(test.check_fields(), false);
 
@@ -24,11 +25,29 @@ describe('Model', function () {
         });
 
         it('Should check model fields and return false', function (done) {
-            var test = new TestModel({id: 1});
+            var test = model_factory({id: 1}, test_model);
 
             assert.equal(test.check_fields(), false);
 
             done();
+        });
+    });
+
+    describe('#add_index', function () {
+        it('Should save index into model', function () {
+            assert.equal(false, true);
+        });
+    });
+
+    describe('#to_object', function () {
+        it('Should convert Model to Object', function () {
+            var test = model_factory({id: 1, name: 'test_model', company_id: 2}, test_model);
+
+            var result = test.to_object();
+
+            assert.equal(result.id, test.id);
+            assert.equal(result.name, test.name);
+            assert.equal(result.company_id, test.company_id);
         });
     });
 });
