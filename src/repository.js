@@ -28,65 +28,67 @@ function Repository (model_schema, redis) {
         }
 
         return new Promise(function (resolve, reject) {
-            get_id(function (err, id) {
-                if (err) reject(err);
+            get_id().then(function (id) {
 
                 if (!model.check_fields()) return reject(new Error('Wrong schema'));
 
                 if (isUpdate) {
-                    check_updating_object_existing(id, function (err, isExist) {
+                    check_updating_object_existing(id).then(function (isExist) {
                         if (!isExist) return reject(new Error('Updating object not exist'));
 
-                        save_or_update(id, model.to_object(), function (err) {
-                            if (err) return reject(err);
+                        save_model(id, resolve, reject);
 
-                            save_indexes(model.indexes, function (err) {
-                                return_result(err, id);
-                            });
-                        });
-                    });
+                    }).catch(reject);
                 } else {
-                    save_or_update(id, model.to_object(), function (err, id) {
-                        if (err) return reject(err);
-
-                        save_indexes(model.indexes, function (err) {
-                            return_result(err, id);
-                        });
-                    });
+                    save_model(id, resolve, reject);
                 }
-            });
-
-            function return_result(err, id) {
-                if (err) reject(err);
-
-                resolve(id);
-            }
+            }).catch(reject);
         });
 
-        function get_id(callback) {
-            if (!model.id) {
-                redis.incr(self.model_schema.key + ':next_id', function (err, id) {
-                    model.id = id;
+        function get_id() {
+            return new Promise(function (resolve, reject) {
+                if (!model.id) {
+                    redis.incr(self.model_schema.key + ':next_id', function (err, id) {
+                        if (err) return reject(err);
 
-                    callback(err, id);
-                });
-            } else {
-                isUpdate = true;
+                        model.id = id;
 
-                callback(null, model.id);
-            }
-        }
+                        resolve(id);
+                    });
+                } else {
+                    isUpdate = true;
 
-        function save_or_update(id, schema, callback) {
-            redis.set(self.model_schema.key + id, JSON.stringify(schema), function (err) {
-                callback(err, id);
+                    resolve(model.id);
+                }
             });
         }
 
-        function save_indexes(indexes, callback) {
+        function save_model(id, resolve, reject) {
+            save_or_update(id, model.to_object()).then(function () {
+                save_indexes(model.indexes).then(function () {
+                    resolve(id)
+                }).catch(reject);
+            }).catch(reject);
+        }
 
-            async.eachSeries(indexes, update_index, function (err) {
-                callback(err, null);
+        function save_or_update(id, schema) {
+            return new Promise(function (resolve, reject) {
+                redis.set(self.model_schema.key + id, JSON.stringify(schema), function (err) {
+                    if (err) return reject(err);
+
+                    resolve(id);
+                });
+            });
+        }
+
+        function save_indexes(indexes) {
+
+            return new Promise(function (resolve, reject) {
+                async.eachSeries(indexes, update_index, function (err) {
+                    if (err) return reject(err);
+
+                    resolve();
+                });
             });
 
             function update_index(index, callback) {
@@ -96,10 +98,15 @@ function Repository (model_schema, redis) {
             }
         }
 
-        function check_updating_object_existing(id, callback) {
-            redis.exists(self.model_schema.key + id, function (err, isExist) {
-                callback(err, isExist);
+        function check_updating_object_existing(id) {
+            return new Promise(function (resolve, reject) {
+                redis.exists(self.model_schema.key + id, function (err, isExist) {
+                    if (err) return reject(err);
+
+                    resolve(isExist);
+                });
             });
+
         }
     };
 
