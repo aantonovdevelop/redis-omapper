@@ -9,11 +9,9 @@ function Model() {
 
         if (Object.keys(schema).length != self.fields.length) return false;
 
-        Object.keys(schema).forEach(function (item) {
-            if (self.fields.indexOf(item) < 0) {
-                result = false;
-            }
-        });
+        Object.keys(schema).forEach(item =>
+            self.fields.indexOf(item) < 0 ? result = false : null
+        );
 
         return result;
     };
@@ -23,7 +21,7 @@ function Model() {
         var result = {};
 
         self.fields.forEach(field =>
-            self[field] ? result[field] = self[field] : null
+            self[field] ? result[field] = self[field] : field === 'id' ? result[field] = undefined : null
         );
 
         return result;

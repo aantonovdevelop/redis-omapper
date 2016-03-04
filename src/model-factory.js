@@ -2,9 +2,9 @@
 
 var Model = require('./model');
 
-module.exports = ModelFactory;
+module.exports = model_factory;
 
-function ModelFactory (schema, model_schema) {
+function model_factory (schema, model_schema) {
 
     var model = new Model();
 
