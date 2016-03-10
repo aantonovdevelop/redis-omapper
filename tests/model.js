@@ -33,12 +33,6 @@ describe('Model', function () {
         });
     });
 
-    describe('#add_index', function () {
-        it('Should save index into model', function () {
-            assert.equal(false, true);
-        });
-    });
-
     describe('#to_object', function () {
         it('Should convert Model to Object', function () {
             var test = model_factory({id: 1, name: 'test_model', company_id: 2}, test_model);

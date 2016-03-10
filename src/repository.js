@@ -3,6 +3,7 @@ var async = require('async');
 var model_factory = require('./model-factory');
 
 function Repository (model_schema, redis) {
+
     this.model_schema = model_schema;
 
     this.get = function (id) {
@@ -28,9 +29,9 @@ function Repository (model_schema, redis) {
         }
 
         return new Promise(function (resolve, reject) {
-            get_id().then(function (id) {
+            if (!model.check_fields()) return reject(new Error('Wrong schema'));
 
-                if (!model.check_fields()) return reject(new Error('Wrong schema'));
+            get_id().then(function (id) {
 
                 if (isUpdate) {
                     check_updating_object_existing(id).then(function (isExist) {
