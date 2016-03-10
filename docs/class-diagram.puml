@@ -1,0 +1,17 @@
+@startuml
+
+class Model
+class ModelFactory
+class Repository
+
+Model : +check_fields() : Bool
+Model : +to_object() : Object
+
+Repository : +get(id) : Promise
+Repository : +save(model) : Promise
+Repository : +delete(id) : Promise
+
+ModelFactory o-- Model
+Repository o-- ModelFactory
+
+@enduml
