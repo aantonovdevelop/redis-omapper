@@ -4,7 +4,8 @@
   "description": "Redis Object Mapper",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./test/**/*.js"
+    "test": "mocha ./test",
+    "coverage": "istanbul cover _mocha -- -R spec"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/aantonovdevelop/redis-orm#readme",
   "devDependencies": {
+    "istanbul": "^0.4.2",
     "mocha": "^2.4.5"
   },
   "dependencies": {
