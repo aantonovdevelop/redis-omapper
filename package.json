@@ -1,7 +1,7 @@
 {
-  "name": "redis-orm",
+  "name": "redis-omapper",
   "version": "0.0.1",
-  "description": "Redis orm",
+  "description": "Redis Object Mapper",
   "main": "index.js",
   "scripts": {
     "test": "mocha ./test/**/*.js"
