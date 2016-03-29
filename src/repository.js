@@ -2,10 +2,23 @@ var async = require('async');
 
 var model_factory = require('./model-factory');
 
+/**
+ * Create Repository instance
+ * 
+ * @param {Object} model_schema Model schema
+ * @param {Object} redis Redis db client
+ * @constructor
+ */
 function Repository (model_schema, redis) {
 
     this.model_schema = model_schema;
 
+    /**
+     * Get object from redis
+     * 
+     * @param {Number} id Object ID
+     * @returns {Promise}
+     */
     this.get = function (id) {
         var self = this;
 
@@ -20,6 +33,12 @@ function Repository (model_schema, redis) {
         });
     };
 
+    /**
+     * Save or update model into redis
+     * 
+     * @param {Object|Model} model Model fields object or model
+     * @returns {Promise}
+     */
     this.save = function (model) {
         var self = this;
         var isUpdate = false;
@@ -111,6 +130,12 @@ function Repository (model_schema, redis) {
         }
     };
 
+    /**
+     * Delete object from redis
+     * 
+     * @param {Number} id Deleting object ID
+     * @returns {Promise}
+     */
     this.delete = function (id) {
         var self = this;
 

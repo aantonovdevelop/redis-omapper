@@ -4,6 +4,14 @@ var Model = require('./model');
 
 module.exports = model_factory;
 
+/**
+ * Create Model instance
+ * 
+ * @param {Object} schema Model fields object
+ * @param {Object} model_schema Model schema
+ * 
+ * @returns {Model}
+ */
 function model_factory (schema, model_schema) {
 
     var model = new Model();
