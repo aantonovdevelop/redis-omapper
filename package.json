@@ -1,5 +1,5 @@
 {
-  "name": "redis-omapper",
+  "name": "@aantonov/redis-omapper",
   "version": "0.0.1",
   "description": "Redis Object Mapper",
   "main": "index.js",
