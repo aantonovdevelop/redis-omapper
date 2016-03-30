@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-var redis = require('./mocks/redis');
+var redis = require('@aantonov/redis-mock');
 
 var Repository = require('../src/repository');
 var test_model = require('./mocks/test-model');
