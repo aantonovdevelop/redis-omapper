@@ -16,7 +16,7 @@
     "orm"
   ],
   "author": "Artem Antonov",
-  "license": "ISC",
+  "license": "MIT",
   "homepage": "https://github.com/aantonovdevelop/redis-omapper#readme",
   "devDependencies": {
     "istanbul": "^0.4.2",
