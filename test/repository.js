@@ -30,6 +30,43 @@ describe('Repository', function () {
         });
     });
 
+    describe('#fetch_by', function () {
+        it('Should return models from db by index', function (done) {
+            redis.store = [];
+            
+            var test_schema = {
+                id: 1,
+                company_id: 1,
+                name: 'test_schema'
+            };
+            
+            var test_schema_2 = {
+                id: 2, 
+                company_id: 1,
+                name: 'test_schema_2'
+            };
+            
+            redis.store['testmodel:info:' + test_schema.id] = JSON.stringify(test_schema);
+
+            redis.store['testmodel:info:' + test_schema_2.id] = JSON.stringify(test_schema_2);
+            
+            redis.store['company:company_models:' + test_schema.company_id] = [test_schema.id, test_schema_2.id];
+            
+            var repository = new Repository(test_model, redis);
+            
+            repository.fetch_by('company_id', test_schema.company_id)
+                .then(function (models) {
+                    assert.ok(models instanceof Array);
+                    assert.equal(models.length, 2);
+                    
+                    assert.equal(models[0].id, test_schema.id);
+                    assert.equal(models[1].id, test_schema_2.id);
+                    
+                    done();
+                }).catch(done);
+        });
+    });
+    
     describe('#save', function () {
         it('Should save model into db', function (done) {
             redis.store = [];

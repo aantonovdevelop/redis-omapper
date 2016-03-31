@@ -32,11 +32,54 @@ function Repository (model_schema, redis) {
             });
         });
     };
+
+    /**
+     * Get all object by index
+     *
+     * @param {String} index Index name
+     * @param {Number} id Index value
+     * 
+     * @returns {Promise}
+     */
+    this.fetch_by = function (index, id) {
+        var self = this;
+
+        return new Promise((resolve, reject) => {
+            get_models_ids(index, self.model_schema.indexes[index], id)
+                .then(get_models_by_ids).then(resolve).catch(reject);
+        });
+
+        function get_models_ids(key, id) {
+            return new Promise((resolve, reject) => {
+                redis.smembers(key + id, (err, ids) => {
+                    err ? reject(err) : resolve(ids);
+                });
+            });
+        }
+        
+        function get_models_by_ids(ids) {
+            var result = [];
+            
+            return new Promise((resolve, reject) => {
+                async.eachSeries(ids, (id, callback) => {
+                    self.get(id).then((model) => {
+                        result.push(model);
+                        
+                        callback();
+                        
+                    }).catch(callback);
+                }, (err) => {
+                    err ? reject(err) : resolve(result);
+                });
+            });
+        }
+    };
     
     /**
      * Save or update model into redis
      * 
      * @param {Object|Model} model Model fields object or model
+     * 
      * @returns {Promise}
      */
     this.save = function (model) {
