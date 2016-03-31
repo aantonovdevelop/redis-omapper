@@ -61,17 +61,18 @@ function Repository (model_schema, redis) {
             var result = [];
             
             return new Promise((resolve, reject) => {
-                async.eachSeries(ids, (id, callback) => {
-                    self.get(id).then((model) => {
-                        result.push(model);
-                        
-                        callback();
-                        
-                    }).catch(callback);
-                }, (err) => {
+                async.eachSeries(ids, get_model, (err) => {
                     err ? reject(err) : resolve(result);
                 });
             });
+            
+            function get_model(id, callback) {
+                self.get(id).then((model) => {
+                    result.push(model);
+                    
+                    callback()
+                }).catch(callback);
+            }
         }
     };
     
