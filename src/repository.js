@@ -12,7 +12,7 @@ var model_factory = require('./model-factory');
 function Repository (model_schema, redis) {
 
     this.model_schema = model_schema;
-
+    
     /**
      * Get object from redis
      * 
@@ -32,7 +32,7 @@ function Repository (model_schema, redis) {
             });
         });
     };
-
+    
     /**
      * Save or update model into redis
      * 
@@ -104,15 +104,15 @@ function Repository (model_schema, redis) {
         function save_indexes(indexes) {
 
             return new Promise(function (resolve, reject) {
-                async.eachSeries(indexes, update_index, function (err) {
+                async.eachSeries(Object.keys(indexes || []), update_index, function (err) {
                     if (err) return reject(err);
 
                     resolve();
                 });
             });
 
-            function update_index(index, callback) {
-                redis.sadd(index.key + model.schema[index.field], model.schema.id, function (err) {
+            function update_index(index, indexes, callback) {
+                redis.sadd(indexes[index] + model.schema[index], model.schema.id, function (err) {
                     callback(err);
                 });
             }

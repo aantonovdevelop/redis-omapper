@@ -5,7 +5,7 @@ var test_model = {
 
     fields: ['id', 'name', 'company_id'],
 
-    indexes: [{field: 'company_id', key: 'company:company_models:'}],
+    indexes: {company_id: 'company:company_models:'},
 
     functions: []
 };

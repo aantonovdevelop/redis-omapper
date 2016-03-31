@@ -46,8 +46,8 @@ describe('Repository', function () {
 
                 assert.equal(JSON.parse(redis.store[test_model.key + id]).id, 1);
 
-                test_model.indexes.forEach(function (item) {
-                    assert.equal(redis.store[item.key + test_model[item.field]], test_model.id);
+                Object.keys(test_model.indexes).forEach(function (item, arr) {
+                    assert.equal(redis.store[item + test_model[arr[item]]], test_model.id);
                 });
 
                 done();
