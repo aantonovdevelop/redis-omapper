@@ -45,7 +45,7 @@ function Repository (model_schema, redis) {
         var self = this;
 
         return new Promise((resolve, reject) => {
-            get_models_ids(index, self.model_schema.indexes[index], id)
+            get_models_ids(self.model_schema.indexes[index], id)
                 .then(get_models_by_ids).then(resolve).catch(reject);
         });
 
