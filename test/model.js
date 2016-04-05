@@ -31,6 +31,14 @@ describe('Model', function () {
 
             done();
         });
+        
+        it('Should check model fields and return false', function (done) {
+            var test = model_factory({id: 1, name: 'test_model'}, test_model);
+            
+            assert.equal(test.check_fields(), false);
+            
+            done();
+        });
     });
 
     describe('#to_object', function () {

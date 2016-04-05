@@ -68,6 +68,7 @@ describe('Repository', function () {
     });
     
     describe('#save', function () {
+        
         it('Should save model into db', function (done) {
             redis.store = [];
 
@@ -163,6 +164,24 @@ describe('Repository', function () {
                 done();
             });
         });
+        
+        it('Should return index error because index field in model not exist', function (done) {
+            redis.store = [];
+            
+            var repository = new Repository(test_model, redis);
+            
+            var test = {
+                id: 1,
+                name: 'TestModel'
+            };
+            
+            repository.save(test).then().catch((err) => {
+                assert.equal(err.message, 'Wrong schema');
+                
+                done();
+            });
+        });
+        
     });
 
     describe('#delete', function () {
