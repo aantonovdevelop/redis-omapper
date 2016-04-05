@@ -184,12 +184,37 @@ function Repository (model_schema, redis) {
         var self = this;
 
         return new Promise(function (resolve, reject) {
-            redis.del(self.model_schema.key + id, function (err) {
-                if (err) reject(err);
-
-                resolve();
-            });
+            self.get(id)
+                .then(delete_indexes)
+                .then(delete_model)
+                .then(resolve)
+                .catch(reject);
         });
+        
+        function delete_indexes (model) {
+            
+            var indexes = self.model_schema.indexes;
+            
+            return new Promise((resolve, reject) => {
+                async.eachSeries(Object.keys(indexes), delete_index, (err) => {
+                    err ? reject(err) : resolve(model);
+                });
+                
+                function delete_index(indexname, callback) {
+                    redis.srem(indexes[indexname] + model[indexname], id, (err) => {
+                        callback(err);
+                    });
+                }
+            });
+        }
+        
+        function delete_model(model) {
+            return new Promise((resolve, reject) => {
+                redis.del(self.model_schema.key + model.id, function (err) {
+                    err ? reject(err) : resolve();
+                });
+            });
+        }
     }
 }
 
