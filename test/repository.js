@@ -74,6 +74,7 @@ describe('Repository', function () {
 
             var test_schema = {
                 company_id: 1,
+                user_id: 1,
                 name: 'test_schema'
             };
 
@@ -120,13 +121,15 @@ describe('Repository', function () {
             var test_schema = {
                 id: test_schema_id,
                 company_id: 1,
-                name: 'test_schema'
+                name: 'test_schema',
+                user_id: 1
             };
 
             var updated_test_schema = {
                 id: test_schema_id,
                 company_id: 1,
-                name: 'updated_test_schema'
+                name: 'updated_test_schema',
+                user_id: 1
             };
 
             redis.store['testmodel:info:' + test_schema_id] = JSON.stringify(test_schema);
@@ -151,7 +154,8 @@ describe('Repository', function () {
             var test_schema = {
                 id: 1,
                 company_id: 1,
-                name: 'test_schema'
+                name: 'test_schema',
+                user_id: 1
             };
 
             var repository = new Repository(test_model, redis);
@@ -192,20 +196,23 @@ describe('Repository', function () {
             var test_schema = {
                 id: 1,
                 name: 'test_schema',
-                company_id: 1
+                company_id: 1,
+                user_id: 2
             };
             
             redis.store['testmodel:info:' + test_schema.id] = JSON.stringify(test_schema);
             redis.store['company:company_models:' + test_schema.company_id] = [test_schema.company_id];
+            redis.store['user:user_model:' + test_schema.user_id] = test_schema.id;
             
             var repository = new Repository(test_model, redis);
             
             repository.delete(test_schema.id).then(() => {
                 assert.equal(redis.store['testmodel:info:' + test_schema.id], undefined);
                 assert.equal(redis.store['company:company_models:' + test_schema.company_id].length, 0);
+                assert.equal(redis.store['user:user_model:' + test_schema.user_id], undefined);
                 
                 done();
             }).catch(done);
         });
-    })
+    });
 });

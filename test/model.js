@@ -9,7 +9,7 @@ describe('Model', function () {
     describe('#check_fields', function () {
 
         it('Should check model fields and return true', function (done) {
-            var test = model_factory({id: 1, name: 'test', company_id: 1}, test_model);
+            var test = model_factory({id: 1, name: 'test', company_id: 1, user_id: 1}, test_model);
 
             assert.equal(test.check_fields(), true);
 
