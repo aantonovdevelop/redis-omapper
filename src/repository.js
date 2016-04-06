@@ -112,7 +112,7 @@ function Repository (model_schema, redis) {
         function get_id() {
             return new Promise(function (resolve, reject) {
                 if (!model.id) {
-                    redis.incr(self.model_schema.key + ':next_id', function (err, id) {
+                    redis.incr(self.model_schema.key + 'next_id', function (err, id) {
                         if (err) return reject(err);
 
                         model.id = id;
