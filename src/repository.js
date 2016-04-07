@@ -13,6 +13,10 @@ function Repository (model_schema, redis) {
 
     this.model_schema = model_schema;
     
+    Object.keys(this.model_schema.indexes).forEach((indexname) => {
+        this.model_schema.indexes[indexname].redis = redis;
+    });
+    
     /**
      * Get object from redis
      * 
@@ -34,47 +38,23 @@ function Repository (model_schema, redis) {
     };
 
     /**
-     * Get all object by index
+     * Get all object by index name
      *
-     * @param {String} index Index name
+     * @param {String} indexname Index name
      * @param {Number} id Index value
      * 
      * @returns {Promise}
      */
-    this.fetch_by = function (index, id) {
+    this.fetch_by = function (indexname, id) {
         var self = this;
 
         return new Promise((resolve, reject) => {
-            get_models_ids(self.model_schema.indexes[index], id)
+            var index = self.model_schema.indexes[indexname];
+            
+            index.get_values(id)
                 .then(get_models_by_ids).then(resolve).catch(reject);
         });
 
-        function get_models_ids(index, id) {
-            return new Promise((resolve, reject) => {
-                if (index.type === 'one_to_one') {
-                    get_one_to_one_ids(index.key + id).then(resolve).catch(reject);
-                } else if (index.type === 'one_to_many') {
-                    get_one_to_many_ids(index.key + id).then(resolve).catch(reject);
-                }
-            });
-            
-            function get_one_to_one_ids(key) {
-                return new Promise((resolve, reject) => {
-                    redis.get(key, (err, id) => {
-                        err ? reject(err) : resolve([id]);
-                    });
-                });
-            }
-            
-            function get_one_to_many_ids(key) {
-                return new Promise((resolve, reject) => {
-                    redis.smembers(key, (err, ids) => {
-                        err ? reject(err) : resolve(ids);
-                    });
-                });
-            }
-        }
-        
         function get_models_by_ids(ids) {
             var result = [];
             
@@ -174,26 +154,8 @@ function Repository (model_schema, redis) {
             });
 
             function update_index(index, indexes, callback) {
-                
-                if (index.type === 'one_to_one') {
-                    update_one_to_one_index(index, indexes, callback)
-                } else if (index.type === 'one_to_many') {
-                    update_one_to_many_index(index, indexes, callback)
-                } else {
-                    callback(new Error('Wrong index type'));
-                }
-                
-                function update_one_to_one_index(index, indexes, callback) {
-                    redis.sadd(indexes[index].key + model.schema[index], model.schema.id, function (err) {
-                        callback(err);
-                    });
-                }
-                
-                function update_one_to_many_index(index, indexes, callback) {
-                    redis.set(indexes[index].key + model.schema[index], model.schema.id, function (err) {
-                        callback(err);
-                    })
-                }
+                indexes[index].update_key(model.schema[index], model.schema.id)
+                    .then(callback, callback);
             }
         }
 
@@ -240,21 +202,7 @@ function Repository (model_schema, redis) {
                     var index = indexes[indexname];
                     var index_value = model[indexname];
                     
-                    if (index.type === 'one_to_one') {
-                        delete_one_to_one_index(index.key + index_value, callback);
-                    } else if (index.type === 'one_to_many') {
-                        delete_one_to_many_index(index.key + index_value, model.id, callback);
-                    } else {
-                        callback(new Error('Wrong index type'));
-                    }
-                    
-                    function delete_one_to_one_index(key, callback) {
-                        redis.del(key, callback);
-                    }
-                    
-                    function delete_one_to_many_index(key, id, callback) {
-                        redis.srem(key, id, callback);
-                    }
+                    index.delete_key(index_value, model.id).then(callback, callback);
                 }
             });
         }
