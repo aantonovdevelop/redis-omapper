@@ -20,6 +20,24 @@ describe('OneToManyKey', function () {
         });
     });
     
+    describe('#get_values', function () {
+        it('Should return values by key', function (done) {
+            redis.store = [];
+        
+            redis.store['somekey:1'] = [1, 2];
+            
+            var OneToManyKey = require('../src/foreign-keys/one-to-many');
+            var index = new OneToManyKey('somekey:', redis);
+            
+            index.get_values(1)
+                .then((res) => {
+                    assert.equal(res.length, 2);
+                    
+                    done();
+                }).catch(done);
+        });
+    });
+    
     describe('#delete_key', function () {
         it('Should delete key in db', function (done) {
             redis.store = [];

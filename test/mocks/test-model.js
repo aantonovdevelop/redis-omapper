@@ -1,20 +1,16 @@
 'use strict';
 
+var keys = require('../../src/foreign-keys');
+
 var test_model = {
     key: 'testmodel:info:',
 
     fields: ['id', 'name', 'company_id', 'user_id'],
 
     indexes: {
-        company_id: {
-            key: 'company:company_models:',
-            type: 'one_to_many'
-        },
+        company_id: keys.one_to_many_key('company:company_models:'),
         
-        user_id: {
-            key: 'user:user_model:',
-            type: 'one_to_one'
-        }
+        user_id: keys.one_to_one_key('user:user_model:')
     },
 
     functions: []

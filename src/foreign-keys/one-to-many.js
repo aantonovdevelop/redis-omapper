@@ -36,6 +36,23 @@ class OneToManyKey extends ForeignKey {
     }
 
     /**
+     * Get values
+     * 
+     * @param keyVal
+     * @returns {Promise}
+     */
+    get_values (keyVal) {
+        var self = this;
+        var full_key = self.key + keyVal;
+        
+        return new Promise((resolve, reject) => {
+            self.redis.smembers(full_key, (err, res) => {
+                (err) ? reject(err) : resolve(res);
+            });
+        });
+    }
+    
+    /**
      * Delete key from db
      * 
      * @param keyVal
