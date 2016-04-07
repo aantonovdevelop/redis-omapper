@@ -11,6 +11,7 @@ describe('Repository', function () {
         id: 1,
         company_id: 1,
         user_id: 1,
+        options_ids: [1, 2, 3],
         
         name: 'test_model_1'
     };
@@ -19,6 +20,7 @@ describe('Repository', function () {
         id: 2,
         company_id: 1,
         user_id: 1,
+        options_ids: [1, 2, 3],
 
         name: 'test_model_2'
     };
@@ -26,6 +28,7 @@ describe('Repository', function () {
     var test_schema_3 = {
         company_id: 1,
         user_id: 1,
+        options_ids: [1, 2, 3],
 
         name: 'test_model_3'
     };

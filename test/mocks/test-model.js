@@ -10,7 +10,9 @@ var test_model = {
     indexes: {
         company_id: keys.one_to_many_key('company:company_models:'),
         
-        user_id: keys.one_to_one_key('user:user_model:')
+        user_id: keys.one_to_one_key('user:user_model:'),
+        
+        options_ids: keys.many_to_one_key('option:option_models:')
     },
 
     functions: []
