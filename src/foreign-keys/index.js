@@ -1,3 +1,5 @@
+'use strict';
+
 var OneToOneKey = require('./one-to-one');
 var OneToManyKey = require('./one-to-many');
 var ManyToOneKey = require('./many-to-one');

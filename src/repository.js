@@ -52,7 +52,8 @@ function Repository (model_schema, redis) {
             var index = self.model_schema.indexes[indexname];
             
             index.get_values(id)
-                .then(get_models_by_ids).then(resolve).catch(reject);
+                .then(get_models_by_ids)
+                .then(resolve).catch(reject);
         });
 
         function get_models_by_ids(ids) {
