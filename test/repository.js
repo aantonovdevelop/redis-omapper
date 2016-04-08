@@ -99,6 +99,36 @@ describe('Repository', function () {
         });
     });
     
+    describe('#fetch_by_many', function () {
+        it('Should returns models by few indexes', function (done) {
+            redis.store = [];
+            
+            redis.store['testmodel:info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store['testmodel:info:' + test_schema_2.id] = JSON.stringify(test_schema_2);
+            
+            redis.store['company:company_models:1'] = [test_schema_2.id];
+            
+            redis.store['option:option_models:1'] = [test_schema_1.id, test_schema_2.id];
+            redis.store['option:option_models:2'] = [test_schema_2.id];
+            
+            var repository = new Repository(test_model, redis);
+            
+            repository.fetch_by_many([{
+                name: 'company_id',
+                key_values: [1]
+            }, {
+                name: 'options_ids',
+                key_values: [1, 2]
+            }]).then((models) => {
+                assert.ok(models instanceof Array);
+                assert.equal(models.length, 1);
+                assert.equal(models[0].id, 2);
+                
+                done();
+            }).catch(done);
+        });
+    });
+    
     describe('#save', function () {
         
         it('Should save model into db', function (done) {

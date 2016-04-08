@@ -52,26 +52,63 @@ function Repository (model_schema, redis) {
             var index = self.model_schema.indexes[indexname];
             
             index.get_values(id)
-                .then(get_models_by_ids)
+                .then(get_models_by_ids.bind(self))
                 .then(resolve).catch(reject);
         });
 
-        function get_models_by_ids(ids) {
-            var result = [];
-            
+    };
+
+    function get_models_by_ids(ids) {
+        var self = this;
+        var result = [];
+
+        return new Promise((resolve, reject) => {
+            async.eachSeries(ids, get_model, (err) => {
+                err ? reject(err) : resolve(result);
+            });
+        });
+
+        function get_model(id, callback) {
+            self.get(id).then((model) => {
+                result.push(model);
+
+                callback()
+            }).catch(callback);
+        }
+    }
+
+    /**
+     * Fetch models by many indexes
+     * 
+     * @param fetchindexes
+     * @returns {Promise}
+     */
+    this.fetch_by_many = function (fetchindexes) {
+        var self = this;
+        var result_keys = [];
+        var indexes = self.model_schema.indexes;
+
+        return new Promise((resolve, reject) => {
+            get_models_ids().then(get_models_by_ids.bind(self)).then(resolve).catch(reject);
+        });
+        
+        function get_models_ids () {
             return new Promise((resolve, reject) => {
-                async.eachSeries(ids, get_model, (err) => {
-                    err ? reject(err) : resolve(result);
+                async.eachSeries(fetchindexes, (fetchindex, callback) => {
+                    indexes[fetchindex.name].get_keys(fetchindex.key_values)
+                        .then((keys) => {
+                            result_keys = result_keys.concat(keys);
+
+                            callback();
+                        }).catch(callback);
+                }, (err) => {
+                    if (err) return reject(err);
+
+                    redis.sinter(result_keys, (err, ids) => {
+                        err ? reject(err) : resolve(ids);
+                    });
                 });
             });
-            
-            function get_model(id, callback) {
-                self.get(id).then((model) => {
-                    result.push(model);
-                    
-                    callback()
-                }).catch(callback);
-            }
         }
     };
     
