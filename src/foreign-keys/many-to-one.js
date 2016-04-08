@@ -42,17 +42,31 @@ class ManyToOneKey extends ForeignKey {
         });
     }
     
-    delete_key (keyVals, modelVal) {
+    delete_key (keyValues, modelVal) {
         var self = this;
         
         return new Promise((resolve, reject) => {
-            async.eachSeries(keyVals, (keyVal, callback) => {
+            async.eachSeries(keyValues, (keyVal, callback) => {
                 self.redis.srem(self.key + keyVal, modelVal, (err) => {
                     callback(err);
                 });
             }, (err) => {
                 err ? reject(err) : resolve(err);
             });
+        });
+    }
+    
+    get_keys (keyValues) {
+        var self = this;
+        
+        return new Promise((resolve) => {
+            var result = [];
+            
+            keyValues.forEach((keyVal) => {
+                result.push(self.key + keyVal);
+            });
+            
+            resolve(result);
         });
     }
 }

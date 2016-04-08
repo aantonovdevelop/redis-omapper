@@ -55,4 +55,18 @@ describe('OneToManyKey', function () {
                 }).catch(done);
         });
     });
+    
+    describe('#get_keys', function () {
+        it('Should return full key', function (done) {
+            var OneToManyKey = require('../src/foreign-keys/one-to-many');
+            var index = new OneToManyKey('somekey:', redis);
+            
+            index.get_keys(1).then((fullKey) => {
+                assert.ok(fullKey instanceof Array);
+                assert.equal(fullKey, 'somekey:1');
+                
+                done();
+            }).catch(done);
+        });
+    });
 });

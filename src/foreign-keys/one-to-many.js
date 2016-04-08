@@ -69,6 +69,20 @@ class OneToManyKey extends ForeignKey {
             });
         });
     }
+
+    /**
+     * Get full key
+     * 
+     * @param keyVal
+     * @returns {Promise}
+     */
+    get_keys (keyVal) {
+        var self = this;
+        
+        return new Promise((resolve) => {
+            resolve([self.key + keyVal]);
+        });
+    }
 }
 
 module.exports = OneToManyKey;

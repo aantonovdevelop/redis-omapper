@@ -65,4 +65,20 @@ describe('ManyToOneKey', function () {
                 }).catch(done);
         });
     });
+    
+    describe('#get_keys', function () {
+        it('Should return full keys', function (done) {
+            var ManyToOneKey = require('../src/foreign-keys/many-to-one');
+            var index = new ManyToOneKey('somekey:', redis);
+            
+            index.get_keys([1, 2]).then((fullKeys) => {
+                assert.ok(fullKeys instanceof Array);
+                assert.equal(fullKeys[0], 'somekey:1');
+                assert.equal(fullKeys[1], 'somekey:2');
+                
+                done();
+                
+            }).catch(done);
+        });
+    });
 });
