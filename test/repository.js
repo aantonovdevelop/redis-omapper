@@ -74,6 +74,29 @@ describe('Repository', function () {
                     done();
                 }).catch(done);
         });
+        
+        it('Should return models by many to one index', function (done) {
+            redis.store = [];
+            
+            redis.store['testmodel:info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store['testmodel:info:' + test_schema_2.id] = JSON.stringify(test_schema_2);
+            
+            redis.store['option:option_models:1'] = [test_schema_1.id, test_schema_2.id];
+            redis.store['option:option_models:2'] = [test_schema_2.id];
+            redis.store['option:option_models:3'] = [test_schema_1.id];
+            
+            var repository = new Repository(test_model, redis);
+            
+            repository.fetch_by('options_ids', [1, 2]).then((models) => {
+                assert.ok(models instanceof Array);
+                
+                assert.equal(models.length, 1);
+                assert.equal(models[0].id, 2);
+                
+                done();
+                
+            }).catch(done);
+        });
     });
     
     describe('#save', function () {
