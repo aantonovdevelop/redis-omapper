@@ -38,6 +38,36 @@ function Repository (model_schema, redis) {
     };
 
     /**
+     * Get many object from redis
+     * 
+     * @param {Array} ids
+     * 
+     * @return {Promise<Array|Error>}
+     */
+    this.get_many = function (ids) {
+        var self = this;
+        
+        return new Promise((resolve, reject) => {
+            var keys = [];
+            var models = [];
+            
+            ids.forEach((id) => {
+                keys.push(self.model_schema.key + id);
+            });
+
+            redis.mget(keys, (err, values) => {
+                if (err) return reject(err);
+                
+                values.forEach((value) => {
+                    models.push(model_factory(JSON.parse(value), self.model_schema));
+                });
+                
+                resolve(models);
+            });
+        });
+    };
+
+    /**
      * Get all object by index name
      *
      * @param {String} indexname Index name

@@ -50,6 +50,27 @@ describe('Repository', function () {
             });
         });
     });
+    
+    describe('#get_many', function () {
+        it('Should return models by keys', function (done) {
+            redis.store[test_model.key + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store[test_model.key + test_schema_2.id] = JSON.stringify(test_schema_2);
+            
+            var repository = new Repository(test_model, redis);
+            
+            repository.get_many([test_schema_1.id, test_schema_2.id]).then((models) => {
+                
+                assert.ok(models instanceof Array);
+                
+                assert.equal(models.length, 2);
+                assert.equal(models[0].id, test_schema_1.id);
+                assert.equal(models[1].id, test_schema_2.id);
+                
+                done();
+                
+            }).catch(done);
+        });
+    });
 
     describe('#fetch_by', function () {
         it('Should return models from db by index', function (done) {
