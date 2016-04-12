@@ -195,7 +195,7 @@ function Repository (model_schema, redis) {
 
         function save_model(id, resolve, reject) {
             save_or_update(id, model.to_object()).then(function () {
-                save_indexes(model.indexes).then(function () {
+                save_indexes(self.model_schema.indexes).then(function () {
                     resolve(id)
                 }).catch(reject);
             }).catch(reject);
@@ -221,8 +221,8 @@ function Repository (model_schema, redis) {
                 });
             });
 
-            function update_index(index, indexes, callback) {
-                indexes[index].update_key(model.schema[index], model.schema.id)
+            function update_index(index, callback) {
+                indexes[index].update_key(model.schema[index], model.id)
                     .then(callback, callback);
             }
         }

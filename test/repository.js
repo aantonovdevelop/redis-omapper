@@ -162,9 +162,13 @@ describe('Repository', function () {
 
                 assert.equal(JSON.parse(redis.store[test_model.key + id]).id, 1);
 
-                Object.keys(test_model.indexes).forEach(function (item, arr) {
-                    assert.equal(redis.store[item + test_model[arr[item]]], test_model.id);
-                });
+                assert.equal(redis.store['company:company_models:' + test_schema_1.company_id][0], id);
+                
+                assert.equal(redis.store['user:user_model:' + test_schema_1.user_id], id);
+                
+                assert.equal(redis.store['option:option_models:1'][0], id);
+                assert.equal(redis.store['option:option_models:2'][0], id);
+                assert.equal(redis.store['option:option_models:3'][0], id);
 
                 done();
             }).catch(function (err) {
