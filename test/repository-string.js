@@ -5,6 +5,7 @@ var redis = require('@aantonov/redis-mock');
 
 var Repository = require('../src/repository');
 var test_model = require('./mocks/test-model');
+var worker = require('../src/redis-model-workers/string-worker')(redis);
 
 describe('Repository', function () {
     var test_schema_1 = {
@@ -38,7 +39,7 @@ describe('Repository', function () {
 
             redis.store[test_model.key + test_schema_1.id] = JSON.stringify(test_schema_1);
 
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
 
             repository.get(test_schema_1.id).then(function(test_model) {
                 assert.equal(test_model.id, test_schema_1.id);
@@ -56,7 +57,7 @@ describe('Repository', function () {
             redis.store[test_model.key + test_schema_1.id] = JSON.stringify(test_schema_1);
             redis.store[test_model.key + test_schema_2.id] = JSON.stringify(test_schema_2);
             
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
             
             repository.get_many([test_schema_1.id, test_schema_2.id]).then((models) => {
                 
@@ -82,7 +83,7 @@ describe('Repository', function () {
             
             redis.store['company:company_models:' + test_schema_1.company_id] = [test_schema_1.id, test_schema_2.id];
             
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
             
             repository.fetch_by('company_id', test_schema_1.company_id)
                 .then(function (models) {
@@ -106,7 +107,7 @@ describe('Repository', function () {
             redis.store['option:option_models:2'] = [test_schema_2.id];
             redis.store['option:option_models:3'] = [test_schema_1.id];
             
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
             
             repository.fetch_by('options_ids', [1, 2]).then((models) => {
                 assert.ok(models instanceof Array);
@@ -132,7 +133,7 @@ describe('Repository', function () {
             redis.store['option:option_models:1'] = [test_schema_1.id, test_schema_2.id];
             redis.store['option:option_models:2'] = [test_schema_2.id];
             
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
             
             repository.fetch_by_many([{
                 name: 'company_id',
@@ -155,7 +156,7 @@ describe('Repository', function () {
         it('Should save model into db', function (done) {
             redis.store = [];
 
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
 
             repository.save(test_schema_3).then(function (id) {
                 assert.equal(id, 1);
@@ -183,7 +184,7 @@ describe('Repository', function () {
                 wrong_field: 'test_schema'
             };
 
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
 
             repository.save(test_model).then(function () {
                 done(new Error('Must be done with error'));
@@ -204,7 +205,7 @@ describe('Repository', function () {
 
             redis.store['testmodel:info:' + test_schema_id] = JSON.stringify(test_schema_1);
 
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
 
             repository.save(updated_test_schema).then(function (id) {
                 assert.equal(id, test_schema_id);
@@ -221,7 +222,7 @@ describe('Repository', function () {
         it('Should fail update because updated object not exist', function (done) {
             redis.store = [];
 
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
 
             repository.save(test_schema_1).then(function () {
                 done(new Error('Must be done with error'));
@@ -235,7 +236,7 @@ describe('Repository', function () {
         it('Should return index error because index field in model not exist', function (done) {
             redis.store = [];
             
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
             
             var test = {
                 id: 1,
@@ -260,7 +261,7 @@ describe('Repository', function () {
             redis.store['company:company_models:' + test_schema_1.company_id] = [test_schema_1.company_id];
             redis.store['user:user_model:' + test_schema_1.user_id] = test_schema_1.id;
             
-            var repository = new Repository(test_model, redis);
+            var repository = new Repository(test_model, worker, redis);
             
             repository.delete(test_schema_1.id).then(() => {
                 assert.equal(redis.store['testmodel:info:' + test_schema_1.id], undefined);

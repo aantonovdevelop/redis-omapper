@@ -6,11 +6,13 @@ var model_factory = require('./model-factory');
  * Create Repository instance
  * 
  * @param {Object} model_schema Model schema
+ * @param {Object} worker Redis model worker object
  * @param {Object} redis Redis db client
+ * 
  * @constructor
  */
-function Repository (model_schema, redis) {
-
+function Repository (model_schema, worker, redis) {
+    
     this.model_schema = model_schema;
     
     Object.keys(this.model_schema.indexes).forEach((indexname) => {
@@ -27,13 +29,11 @@ function Repository (model_schema, redis) {
         var self = this;
 
         return new Promise(function (resolve, reject) {
-            redis.get(self.model_schema.key + id, function (err, schema) {
-                if (err) reject(err);
-
-                var result_model = model_factory(JSON.parse(schema), model_schema);
-
+            return worker.get_model(self.model_schema.key + id).then((schema) => {
+                var result_model = model_factory(schema, model_schema);
+                
                 resolve(result_model);
-            });
+            }).catch(reject);
         });
     };
 
@@ -55,15 +55,11 @@ function Repository (model_schema, redis) {
                 keys.push(self.model_schema.key + id);
             });
 
-            redis.mget(keys, (err, values) => {
-                if (err) return reject(err);
-                
-                values.forEach((value) => {
-                    models.push(model_factory(JSON.parse(value), self.model_schema));
-                });
+            worker.get_many(keys).then((values) => {
+                values.forEach((value) => models.push(value));
                 
                 resolve(models);
-            });
+            }).catch(reject);
         });
     };
 
@@ -202,13 +198,7 @@ function Repository (model_schema, redis) {
         }
 
         function save_or_update(id, schema) {
-            return new Promise(function (resolve, reject) {
-                redis.set(self.model_schema.key + id, JSON.stringify(schema), function (err) {
-                    if (err) return reject(err);
-
-                    resolve(id);
-                });
-            });
+            return worker.save_model(self.model_schema.key + id, schema)
         }
 
         function save_indexes(indexes) {
@@ -239,6 +229,19 @@ function Repository (model_schema, redis) {
         }
     };
 
+    /**
+     * Update object field in db
+     * 
+     * @param {Number} id
+     * @param {String} field
+     * @param value
+     * 
+     * @return {Promise}
+     */
+    this.update_field = function(id, field, value) {
+        return worker.save_field(this.model_schema.key + id, field, value);
+    };
+    
     /**
      * Delete object from redis
      * 
@@ -276,11 +279,7 @@ function Repository (model_schema, redis) {
         }
         
         function delete_model(model) {
-            return new Promise((resolve, reject) => {
-                redis.del(self.model_schema.key + model.id, function (err) {
-                    err ? reject(err) : resolve();
-                });
-            });
+            return worker.delete_model(self.model_schema.key + model.id)
         }
     }
 }
