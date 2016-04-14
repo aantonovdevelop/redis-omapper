@@ -14,16 +14,14 @@ var model_factory = require('./model-factory');
 function Repository (model_schema, worker, redis) {
     
     this.model_schema = model_schema;
-    
-    Object.keys(this.model_schema.indexes).forEach((indexname) => {
-        this.model_schema.indexes[indexname].redis = redis;
-    });
+
+    bind_redis_to_foreign_keys.call(this);
     
     /**
      * Get object from redis
      * 
      * @param {Number} id Object ID
-     * @returns {Promise}
+     * @returns {Promise <Object|Error>}
      */
     this.get = function (id) {
         var self = this;
@@ -41,7 +39,6 @@ function Repository (model_schema, worker, redis) {
      * Get many object from redis
      * 
      * @param {Array} ids
-     * 
      * @return {Promise<Array|Error>}
      */
     this.get_many = function (ids) {
@@ -69,7 +66,7 @@ function Repository (model_schema, worker, redis) {
      * @param {String} indexname Index name
      * @param {Number} id Index value
      * 
-     * @returns {Promise}
+     * @returns {Promise <Array|Error>}
      */
     this.fetch_by = function (indexname, id) {
         var self = this;
@@ -84,30 +81,11 @@ function Repository (model_schema, worker, redis) {
 
     };
 
-    function get_models_by_ids(ids) {
-        var self = this;
-        var result = [];
-
-        return new Promise((resolve, reject) => {
-            async.eachSeries(ids, get_model, (err) => {
-                err ? reject(err) : resolve(result);
-            });
-        });
-
-        function get_model(id, callback) {
-            self.get(id).then((model) => {
-                result.push(model);
-
-                callback()
-            }).catch(callback);
-        }
-    }
-
     /**
      * Fetch models by many indexes
      * 
-     * @param fetchindexes
-     * @returns {Promise}
+     * @param {Array} fetchindexes
+     * @returns {Promise <Array|Error>}
      */
     this.fetch_by_many = function (fetchindexes) {
         var self = this;
@@ -143,7 +121,7 @@ function Repository (model_schema, worker, redis) {
      * 
      * @param {Object|Model} model Model fields object or model
      * 
-     * @returns {Promise}
+     * @returns {Promise <undefined|Error>}
      */
     this.save = function (model) {
         var self = this;
@@ -234,9 +212,9 @@ function Repository (model_schema, worker, redis) {
      * 
      * @param {Number} id
      * @param {String} field
-     * @param value
+     * @param {Number|String|Object} value
      * 
-     * @return {Promise}
+     * @return {Promise <undefined|Error>}
      */
     this.update_field = function(id, field, value) {
         return worker.save_field(this.model_schema.key + id, field, value);
@@ -246,7 +224,7 @@ function Repository (model_schema, worker, redis) {
      * Delete object from redis
      * 
      * @param {Number} id Deleting object ID
-     * @returns {Promise}
+     * @returns {Promise <undefined|Error>}
      */
     this.delete = function (id) {
         var self = this;
@@ -281,7 +259,46 @@ function Repository (model_schema, worker, redis) {
         function delete_model(model) {
             return worker.delete_model(self.model_schema.key + model.id)
         }
+    };
+
+    /**
+     * Private functions
+     */
+
+    /**
+     * Get models by IDs
+     * 
+     * @param {Array} ids
+     * @returns {Promise <Array|Error>}
+     */
+    function get_models_by_ids(ids) {
+        var self = this;
+        var result = [];
+
+        return new Promise((resolve, reject) => {
+            async.eachSeries(ids, get_model, (err) => {
+                err ? reject(err) : resolve(result);
+            });
+        });
+
+        function get_model(id, callback) {
+            self.get(id).then((model) => {
+                result.push(model);
+
+                callback()
+            }).catch(callback);
+        }
     }
+
+    /**
+     * Bind redis to foreign keys
+     */
+    function bind_redis_to_foreign_keys() {
+        Object.keys(this.model_schema.indexes).forEach((indexname) => {
+            this.model_schema.indexes[indexname].redis = redis;
+        });
+    }
+    
 }
 
 module.exports = Repository;
