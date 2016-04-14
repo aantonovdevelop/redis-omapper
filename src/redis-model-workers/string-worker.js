@@ -34,6 +34,12 @@ module.exports = function (redis) {
             });
         },
         
+        save_field: function () {
+            return new Promise((resolve, reject) => {
+                reject(new Error('Not implemented exception'));
+            });
+        },
+        
         delete_model: function (key) {
             return new Promise((resolve, reject) => {
                 redis.del(key, (err) => {
