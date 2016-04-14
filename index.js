@@ -11,10 +11,10 @@ module.exports = {
     keys: keys,
     
     create_string_repository: function (model, redis) {
-        repository_factory.create_string_repository(model, redis);
+        return repository_factory.create_string_repository(model, redis);
     },
     
     create_hash_repository: function (model, redis) {
-        repository_factory.create_hash_repository(model, redis);
+        return repository_factory.create_hash_repository(model, redis);
     }
 };
