@@ -30,6 +30,6 @@ function set_model_functions(model_schema, model) {
 }
 
 function set_model_fields(schema, model_schema, model) {
-    schema ? model_schema.fields.forEach(field => model[field] = schema[field]) : null;
+    schema ? Object.keys(model_schema.fields).forEach(field => model[field] = schema[field]) : null;
 }
 

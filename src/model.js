@@ -7,10 +7,10 @@ function Model() {
 
         var schema = self.to_object();
 
-        if (Object.keys(schema).length != self.fields.length) return false;
+        if (Object.keys(schema).length != Object.keys(self.fields).length) return false;
 
         Object.keys(schema).forEach(item =>
-            self.fields.indexOf(item) < 0 ? result = false : null
+            Object.keys(self.fields).indexOf(item) < 0 ? result = false : null
         );
 
         return result;
@@ -20,7 +20,7 @@ function Model() {
         var self = this;
         var result = {};
 
-        self.fields.forEach(field =>
+        Object.keys(self.fields).forEach(field =>
             self[field] ? result[field] = self[field] : field === 'id' ? result[field] = undefined : null
         );
 

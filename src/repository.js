@@ -14,7 +14,8 @@ var model_factory = require('./model-factory');
 function Repository (model_schema, worker, redis) {
     
     this.model_schema = model_schema;
-
+    worker.model_schema = model_schema;
+    
     bind_redis_to_foreign_keys.call(this);
     
     /**

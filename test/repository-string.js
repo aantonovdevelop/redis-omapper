@@ -44,6 +44,8 @@ describe('Repository', function () {
             repository.get(test_schema_1.id).then(function(test_model) {
                 assert.equal(test_model.id, test_schema_1.id);
                 assert.equal(test_model.name, test_schema_1.name);
+                
+                assert.ok(test_model.options_ids instanceof Array);
 
                 done();
             }).catch(function (err) {
@@ -170,7 +172,7 @@ describe('Repository', function () {
                 assert.equal(redis.store['option:option_models:1'][0], id);
                 assert.equal(redis.store['option:option_models:2'][0], id);
                 assert.equal(redis.store['option:option_models:3'][0], id);
-
+                
                 done();
             }).catch(function (err) {
                 done(err);
@@ -261,12 +263,20 @@ describe('Repository', function () {
             redis.store['company:company_models:' + test_schema_1.company_id] = [test_schema_1.company_id];
             redis.store['user:user_model:' + test_schema_1.user_id] = test_schema_1.id;
             
+            redis.store['option:option_models:' + 1] = [test_schema_1.id];
+            redis.store['option:option_models:' + 2] = [test_schema_1.id];
+            redis.store['option:option_models:' + 3] = [test_schema_1.id];
+            
             var repository = new Repository(test_model, worker, redis);
             
             repository.delete(test_schema_1.id).then(() => {
                 assert.equal(redis.store['testmodel:info:' + test_schema_1.id], undefined);
                 assert.equal(redis.store['company:company_models:' + test_schema_1.company_id].length, 0);
                 assert.equal(redis.store['user:user_model:' + test_schema_1.user_id], undefined);
+
+                assert.equal(redis.store['option:option_models:' + 1].length, 0);
+                assert.equal(redis.store['option:option_models:' + 2].length, 0);
+                assert.equal(redis.store['option:option_models:' + 3].length, 0);
                 
                 done();
             }).catch(done);

@@ -12,7 +12,7 @@ var test_schema_1 = {
     id: 1,
     company_id: 1,
     user_id: 1,
-    options_ids: [1, 2, 3],
+    options_ids: "[1, 2, 3]",
 
     name: 'test_model_1'
 };
@@ -21,7 +21,7 @@ var test_schema_2 = {
     id: 2,
     company_id: 1,
     user_id: 1,
-    options_ids: [1, 2, 3],
+    options_ids: "[1, 2, 3]",
 
     name: 'test_model_2'
 };
@@ -45,6 +45,7 @@ describe('Repository', function () {
 
             repository.get(test_schema_1.id).then((model) => {
                 assert.equal(model.id, test_schema_1.id);
+                assert.ok(model.options_ids instanceof Array);
                 
                 done();
             }).catch(done);
@@ -78,7 +79,9 @@ describe('Repository', function () {
             repository.save(test_schema_3).then((id) => {
                 assert.ok(id);
                 
-                redis.store['testmodel:info:' + id].id = id;
+                assert.equal(redis.store['testmodel:info:' + id].id, id);
+                
+                assert.equal(redis.store['testmodel:info:' + id].options_ids, "[1,2,3]");
                 
                 done();
             }).catch(done);
@@ -98,5 +101,18 @@ describe('Repository', function () {
                 done();
             }).catch(done);
         });
+        
+        it('Should update array field of model in db', function (done) {
+            var repository = new Repository(test_model, worker, redis);
+            
+            redis.store = [];
+            redis.store['testmodel:info:1'] = test_schema_1;
+            
+            repository.update_field(1, 'options_ids', [1, 2, 3, 4, 5]).then(() => {
+                assert.equal(redis.store['testmodel:info:1'].options_ids, "[1,2,3,4,5]");
+                
+                done();
+            }).catch(done);
+        })
     });
 });

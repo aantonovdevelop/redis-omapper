@@ -5,7 +5,13 @@ var keys = require('../../src/foreign-keys');
 var test_model = {
     key: 'testmodel:info:',
 
-    fields: ['id', 'name', 'company_id', 'user_id'],
+    fields: {
+        id: 'Number',
+        name: 'String',
+        company_id: 'String',
+        user_id: 'Number',
+        options_ids: 'Array'
+    },
 
     indexes: {
         company_id: keys.one_to_many_key('company:company_models:'),

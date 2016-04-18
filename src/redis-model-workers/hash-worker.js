@@ -3,26 +3,55 @@
 var async = require('async');
 
 module.exports = function (redis) {
+    
+    function parse (raw) {
+        var fields = this.model_schema.fields;
+        var model = raw;
+        
+        return new Promise((resolve) => {
+            Object.keys(fields).forEach((field) => 
+                fields[field] === 'Array' ? raw[field] = JSON.parse(model[field]) : null);
+            
+            resolve(model);
+        });
+    }
+    
+    function stringify (model) {
+        var fields = this.model_schema.fields;
+        var raw = model;
+        
+        return new Promise((resolve) => {
+            Object.keys(fields).forEach((field) =>
+                fields[field] === 'Array' ? model[field] = JSON.stringify(raw[field]) : null);
+            
+            resolve(raw);
+        });
+    }
+    
     return {
         get_model: function (key) {
-            return new Promise((resolve, reject) => {
-                redis.hgetall(key, (err, model) => {
-                    err ? reject(err) : resolve(model);
+            return get(key).then(parse.bind(this));
+            
+            function get (key) {
+                return new Promise((resolve, reject) => {
+                    redis.hgetall(key, (err, model) => {
+                        err ? reject(err) : resolve(model);
+                    });
                 });
-            });
+            }
         },
-
+        
         get_many: function (keys) {
+            var self = this;
+            
             return new Promise((resolve, reject) => {
                 var result = [];
                 
                 async.eachSeries(keys, (key, callback) => {
-                    redis.hgetall(keys, (err, model) => {
+                    redis.hgetall(key, (err, raw) => {
                         if (err) return callback(err);
                         
-                        result.push(model);
-                        
-                        callback();
+                        parse.bind(self)(raw).then((model) => result.push(model)).then(() => callback()).catch(callback);
                     });
                 }, (err) => {
                     err ? reject(err) : resolve(result);
@@ -31,16 +60,24 @@ module.exports = function (redis) {
         },
 
         save_model: function (key, model) {
-            return new Promise((resolve, reject) => {
-                redis.hmset(key, model, (err) => {
-                    err ? reject(err) : resolve();
+            return stringify.bind(this)(model).then(save);
+            
+            function save(raw) {
+                return new Promise((resolve, reject) => {
+                    redis.hmset(key, raw, (err) => {
+                        err ? reject(err) : resolve();
+                    });
                 });
-            });
+            }
         },
         
         save_field: function (key, field, value) {
+            var self = this;
+            
             return new Promise((resolve, reject) => {
-                redis.hset(key, field, value, (err) => {
+                var val = (self.model_schema.fields[field] === 'Array') ? JSON.stringify(value) : value;
+                
+                redis.hset(key, field, val, (err) => {
                     err ? reject(err) : resolve();
                 });
             });
