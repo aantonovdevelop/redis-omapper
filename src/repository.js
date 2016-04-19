@@ -43,22 +43,26 @@ function Repository (model_schema, worker, redis) {
      * @return {Promise<Array|Error>}
      */
     this.get_many = function (ids) {
+        return worker.get_many(ids_to_keys.bind(this)(ids));
+    };
+
+    /**
+     * Get all objects from redis
+     * 
+     * @return {Promise<Array|Error>}
+     */
+    this.get_all = function () {
         var self = this;
         
-        return new Promise((resolve, reject) => {
-            var keys = [];
-            var models = [];
-            
-            ids.forEach((id) => {
-                keys.push(self.model_schema.key + id);
+        return get_all_keys().then(worker.get_many);
+        
+        function get_all_keys () {
+            return new Promise((resolve, reject) => {
+                redis.keys(self.model_schema.key + '*', (err, keys) => {
+                    err ? reject(err) : resolve(keys);
+                });
             });
-
-            worker.get_many(keys).then((values) => {
-                values.forEach((value) => models.push(value));
-                
-                resolve(models);
-            }).catch(reject);
-        });
+        }
     };
 
     /**
@@ -298,6 +302,14 @@ function Repository (model_schema, worker, redis) {
         Object.keys(this.model_schema.indexes).forEach((indexname) => {
             this.model_schema.indexes[indexname].redis = redis;
         });
+    }
+    
+    function ids_to_keys (ids) {
+        var keys = [];
+        
+        ids.forEach((id) => keys.push(this.model_schema.key + id));
+        
+        return keys;
     }
     
 }
