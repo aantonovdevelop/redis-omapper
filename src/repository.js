@@ -54,7 +54,7 @@ function Repository (model_schema, worker, redis) {
     this.get_all = function () {
         var self = this;
         
-        return get_all_keys().then(worker.get_many);
+        return get_all_keys().then(worker.get_many.bind(worker));
         
         function get_all_keys () {
             return new Promise((resolve, reject) => {

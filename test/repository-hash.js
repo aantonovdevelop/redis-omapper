@@ -69,6 +69,24 @@ describe('Repository', function () {
             }).catch(done);
         });
     });
+
+    describe('#get_all', function () {
+        it('Should return all models', function (done) {
+            redis.store =  [];
+            
+            redis.store[test_model.key + test_schema_1.id] = test_schema_1;
+            redis.store[test_model.key + test_schema_2.id] = test_schema_2;
+
+            var repository = new Repository(test_model, worker, redis);
+
+            repository.get_all().then((models) => {
+                assert.ok(models instanceof Array);
+                assert.equal(models.length, 2);
+
+                done();
+            }).catch(done);
+        });
+    });
     
     describe('#save', function () {
         it('Should save model in db', function (done) {
