@@ -9,8 +9,10 @@ module.exports = function (redis) {
         var model = raw;
         
         return new Promise((resolve) => {
-            Object.keys(fields).forEach((field) => 
-                fields[field] === 'Array' ? raw[field] = JSON.parse(model[field]) : null);
+            Object.keys(fields).forEach((field) => {
+                fields[field] === 'Array' ? raw[field] = JSON.parse(model[field]) : null;
+                fields[field] === 'Object' ? raw[field] = JSON.parse(model[field]) : null;
+            });
             
             resolve(model);
         });
@@ -21,8 +23,10 @@ module.exports = function (redis) {
         var raw = model;
         
         return new Promise((resolve) => {
-            Object.keys(fields).forEach((field) =>
-                fields[field] === 'Array' ? model[field] = JSON.stringify(raw[field]) : null);
+            Object.keys(fields).forEach((field) => {
+                fields[field] === 'Array' ? model[field] = JSON.stringify(raw[field]) : null;
+                fields[field] === 'Object' ? model[field] = JSON.stringify(raw[field]) : null;
+            });
             
             resolve(raw);
         });
