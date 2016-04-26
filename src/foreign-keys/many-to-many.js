@@ -5,10 +5,11 @@ var ForeignKey = require('./foreign-key');
 
 class ManyToManyKey extends ForeignKey {
     
-    constructor (key, redis) {
+    constructor (key, dkey, redis) {
         super();
         
         this.key = key;
+        this.dkey = dkey;
         this.redis = redis;
     }
     
@@ -48,10 +49,16 @@ class ManyToManyKey extends ForeignKey {
         
         return new Promise((resolve, reject) => {
             async.eachSeries(keyValues, delete_key, err => err ? reject(err) : resolve(err));
-        });
+        }).then(() => delete_dkey(modelVal));
         
         function delete_key(value, callback) {
             self.redis.srem(self.key + value, modelVal, callback);
+        }
+        
+        function delete_dkey(value) {
+            return new Promise((resolve, reject) => {
+                self.redis.del(self.dkey + value, err => err ? reject(err) : resolve());
+            });
         }
     }
     

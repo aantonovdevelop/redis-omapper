@@ -9,7 +9,7 @@ describe('ManyToManyKey', function () {
             redis.store = [];
             
             var ManyToOneKey = require('../src/foreign-keys/many-to-many');
-            var index = new ManyToOneKey('somevalues:', redis);
+            var index = new ManyToOneKey('somevalues:', '', redis);
             
             index.update_key([1, 2, 3], 50).then(() => {
                 assert.equal(redis.store['somevalues:1'][0], 50);
@@ -26,12 +26,12 @@ describe('ManyToManyKey', function () {
             redis.store = [];
             
             var ManyToOneKey = require('../src/foreign-keys/many-to-many');
-            var index = new ManyToOneKey('somevalues:', redis);
+            var index = new ManyToOneKey('somevalues:', '', redis);
             
             redis.store['somevalues:1'] = [2, 3, 4, 5];
             redis.store['somevalues:2'] = [1, 2, 3, 5];
             redis.store['somevalues:3'] = [1, 3, 5];
-
+            
             index.get_values([1, 2, 3])
                 .then((res) => {
                     assert.equal(res.length, 2);
@@ -49,17 +49,21 @@ describe('ManyToManyKey', function () {
             redis.store = [];
 
             var ManyToOneKey = require('../src/foreign-keys/many-to-many');
-            var index = new ManyToOneKey('somevalues:', redis);
+            var index = new ManyToOneKey('somevalues:', 'somemodels:', redis);
 
             redis.store['somevalues:1'] = [2, 3, 4, 5];
             redis.store['somevalues:2'] = [1, 2, 3, 5];
             redis.store['somevalues:3'] = [1, 3, 5];
             
+            redis.store['somemodels:3'] = [1, 2, 3];
+
             index.delete_key([1, 2, 3], 3)
                 .then(() => {
                     assert.equal(redis.store['somevalues:1'].indexOf(3), -1);
                     assert.equal(redis.store['somevalues:2'].indexOf(3), -1);
                     assert.equal(redis.store['somevalues:3'].indexOf(3), -1);
+                    
+                    assert.equal(redis.store['somemodels:3'], undefined);
                     
                     done();
                 }).catch(done);
@@ -69,7 +73,7 @@ describe('ManyToManyKey', function () {
     describe('#get_keys', function () {
         it('Should return full keys', function (done) {
             var ManyToOneKey = require('../src/foreign-keys/many-to-many');
-            var index = new ManyToOneKey('somekey:', redis);
+            var index = new ManyToOneKey('somekey:', '', redis);
             
             index.get_keys([1, 2]).then((fullKeys) => {
                 assert.ok(fullKeys instanceof Array);
