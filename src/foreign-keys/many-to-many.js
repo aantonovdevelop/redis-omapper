@@ -16,58 +16,61 @@ class ManyToManyKey extends ForeignKey {
         var self = this;
         
         return new Promise((resolve, reject) => {
-            async.eachSeries(keyValues, (keyVal, callback) => {
-                self.redis.sadd(self.key + keyVal, modelVal, (err) => {
-                    callback(err);
-                });
-            }, (err) => {
-                err ? reject(err) : resolve();
-            });
+            async.eachSeries(keyValues, add_value_to_key, err => err ? reject(err) : resolve());
         });
+        
+        function add_value_to_key(value, callback) {
+            self.redis.sadd(self.key + value, modelVal, callback);
+        }
     }
     
     get_values (keyValues) {
         var self = this;
 
         return new Promise((resolve, reject) => {
-            var full_keys = [];
-            
-            keyValues.forEach((keyVal) => {
-                full_keys.push(self.key + keyVal);
-            });
-                
-            self.redis.sinter(full_keys, (err, res) => {
-                err ? reject(err) : resolve(res);
-            });
+            self.redis.sinter(generate_full_keys(keyValues), (err, res) => 
+                err ? reject(err) : resolve(res));
         });
+        
+        function generate_full_keys(values) {
+            var full_keys = [];
+
+            values.forEach((values) => {
+                full_keys.push(self.key + values);
+            });
+
+            return full_keys;
+        }
     }
     
     delete_key (keyValues, modelVal) {
         var self = this;
         
         return new Promise((resolve, reject) => {
-            async.eachSeries(keyValues, (keyVal, callback) => {
-                self.redis.srem(self.key + keyVal, modelVal, (err) => {
-                    callback(err);
-                });
-            }, (err) => {
-                err ? reject(err) : resolve(err);
-            });
+            async.eachSeries(keyValues, delete_key, err => err ? reject(err) : resolve(err));
         });
+        
+        function delete_key(value, callback) {
+            self.redis.srem(self.key + value, modelVal, callback);
+        }
     }
     
     get_keys (keyValues) {
         var self = this;
         
         return new Promise((resolve) => {
-            var result = [];
+            resolve(generate_full_keys(keyValues));
+        });
+        
+        function generate_full_keys(values) {
+            var full_keys = [];
             
-            keyValues.forEach((keyVal) => {
-                result.push(self.key + keyVal);
+            values.forEach((value) => {
+                full_keys.push(self.key + value);
             });
             
-            resolve(result);
-        });
+            return full_keys;
+        }
     }
 }
 
