@@ -14,6 +14,6 @@ describe('Export', function () {
         
         assert.equal(mod.keys.one_to_one_key('somekey').constructor.name, 'OneToOneKey');
         assert.equal(mod.keys.one_to_many_key('somekey').constructor.name, 'OneToManyKey');
-        assert.equal(mod.keys.many_to_one_key('somekey').constructor.name, 'ManyToOneKey');
+        assert.equal(mod.keys.many_to_many_key('somekey').constructor.name, 'ManyToManyKey');
     });
 });

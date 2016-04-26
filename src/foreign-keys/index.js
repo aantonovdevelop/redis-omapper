@@ -2,7 +2,7 @@
 
 var OneToOneKey = require('./one-to-one');
 var OneToManyKey = require('./one-to-many');
-var ManyToOneKey = require('./many-to-many');
+var ManyToManyKey = require('./many-to-many');
 
 module.exports = {
     one_to_one_key : function (key) {
@@ -13,7 +13,7 @@ module.exports = {
         return new OneToManyKey(key, null);
     },
     
-    many_to_one_key: function (key) {
-        return new ManyToOneKey(key, null);
+    many_to_many_key: function (key) {
+        return new ManyToManyKey(key, null);
     }
 };

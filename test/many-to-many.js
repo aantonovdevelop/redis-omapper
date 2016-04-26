@@ -3,7 +3,7 @@
 var redis = require('@aantonov/redis-mock');
 var assert = require('assert');
 
-describe('ManyToOneKey', function () {
+describe('ManyToManyKey', function () {
     describe('#update_key', function () {
         it('Should save key into db', function (done) {
             redis.store = [];

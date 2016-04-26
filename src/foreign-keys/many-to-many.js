@@ -3,7 +3,7 @@
 var async = require('async');
 var ForeignKey = require('./foreign-key');
 
-class ManyToOneKey extends ForeignKey {
+class ManyToManyKey extends ForeignKey {
     
     constructor (key, redis) {
         super();
@@ -71,4 +71,4 @@ class ManyToOneKey extends ForeignKey {
     }
 }
 
-module.exports = ManyToOneKey;
+module.exports = ManyToManyKey;
