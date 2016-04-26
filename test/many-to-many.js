@@ -8,7 +8,7 @@ describe('ManyToOneKey', function () {
         it('Should save key into db', function (done) {
             redis.store = [];
             
-            var ManyToOneKey = require('../src/foreign-keys/many-to-one');
+            var ManyToOneKey = require('../src/foreign-keys/many-to-many');
             var index = new ManyToOneKey('somevalues:', redis);
             
             index.update_key([1, 2, 3], 50).then(() => {
@@ -25,7 +25,7 @@ describe('ManyToOneKey', function () {
         it('Should return values by keys', function (done) {
             redis.store = [];
             
-            var ManyToOneKey = require('../src/foreign-keys/many-to-one');
+            var ManyToOneKey = require('../src/foreign-keys/many-to-many');
             var index = new ManyToOneKey('somevalues:', redis);
             
             redis.store['somevalues:1'] = [2, 3, 4, 5];
@@ -48,7 +48,7 @@ describe('ManyToOneKey', function () {
         it('Should delete value from all keys', function (done) {
             redis.store = [];
 
-            var ManyToOneKey = require('../src/foreign-keys/many-to-one');
+            var ManyToOneKey = require('../src/foreign-keys/many-to-many');
             var index = new ManyToOneKey('somevalues:', redis);
 
             redis.store['somevalues:1'] = [2, 3, 4, 5];
@@ -68,7 +68,7 @@ describe('ManyToOneKey', function () {
     
     describe('#get_keys', function () {
         it('Should return full keys', function (done) {
-            var ManyToOneKey = require('../src/foreign-keys/many-to-one');
+            var ManyToOneKey = require('../src/foreign-keys/many-to-many');
             var index = new ManyToOneKey('somekey:', redis);
             
             index.get_keys([1, 2]).then((fullKeys) => {
