@@ -9,12 +9,14 @@ describe('ManyToManyKey', function () {
             redis.store = [];
             
             var ManyToOneKey = require('../src/foreign-keys/many-to-many');
-            var index = new ManyToOneKey('somevalues:', '', redis);
+            var index = new ManyToOneKey('somevalues:', 'somemodels:', redis);
             
             index.update_key([1, 2, 3], 50).then(() => {
                 assert.equal(redis.store['somevalues:1'][0], 50);
                 assert.equal(redis.store['somevalues:2'][0], 50);
                 assert.equal(redis.store['somevalues:3'][0], 50);
+                
+                assert.equal(redis.store['somemodels:50'].length, 3);
                 
                 done();
             }).catch(done);

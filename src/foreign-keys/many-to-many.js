@@ -18,10 +18,21 @@ class ManyToManyKey extends ForeignKey {
         
         return new Promise((resolve, reject) => {
             async.eachSeries(keyValues, add_value_to_key, err => err ? reject(err) : resolve());
-        });
+        }).then(() => update_dkey(keyValues));
         
         function add_value_to_key(value, callback) {
             self.redis.sadd(self.key + value, modelVal, callback);
+        }
+
+        function update_dkey(values) {
+            return new Promise((resolve, reject) => {
+                self.redis.multi()
+                    .del(self.dkey + modelVal)
+                    .sadd(self.dkey + modelVal, values)
+                    .exec_atomic((err) => {
+                        err ? reject(err) : resolve();
+                    });
+            });
         }
     }
     
