@@ -189,7 +189,12 @@ describe('Repository', function () {
                 assert.equal(redis.store['option:option_models:2'][0], id);
                 assert.equal(redis.store['option:option_models:3'][0], id);
                 
+                assert.equal(redis.store['testmodel:model_options:' + id][0], 1);
+                assert.equal(redis.store['testmodel:model_options:' + id][1], 2);
+                assert.equal(redis.store['testmodel:model_options:' + id][2], 3);
+                
                 done();
+                
             }).catch(function (err) {
                 done(err);
             });
@@ -218,10 +223,13 @@ describe('Repository', function () {
 
             var test_schema_id = 1;
 
-            var updated_test_schema = test_schema_1;
+            var updated_test_schema = JSON.parse(JSON.stringify(test_schema_1));
+            
             updated_test_schema.name = 'updated_name';
+            updated_test_schema.options_ids = [1];
 
             redis.store['testmodel:info:' + test_schema_id] = JSON.stringify(test_schema_1);
+            redis.store['testmodel:model_options:' + test_schema_id] = test_schema_1.options_ids;
 
             var repository = new Repository(test_model, worker, redis);
 
@@ -230,6 +238,8 @@ describe('Repository', function () {
 
                 assert.equal(JSON.parse(redis.store['testmodel:info:' + test_schema_id]).id, test_schema_id);
                 assert.equal(JSON.parse(redis.store['testmodel:info:' + test_schema_id]).name, updated_test_schema.name);
+                
+                assert.equal(redis.store['testmodel:model_options:' + test_schema_id].length, 1);
 
                 done();
             }).catch(function (err) {
@@ -283,6 +293,8 @@ describe('Repository', function () {
             redis.store['option:option_models:' + 2] = [test_schema_1.id];
             redis.store['option:option_models:' + 3] = [test_schema_1.id];
             
+           redis.store['testmodel:model_options:' + test_schema_1.id] = test_schema_1.options_ids;
+            
             var repository = new Repository(test_model, worker, redis);
             
             repository.delete(test_schema_1.id).then(() => {
@@ -293,6 +305,8 @@ describe('Repository', function () {
                 assert.equal(redis.store['option:option_models:' + 1].length, 0);
                 assert.equal(redis.store['option:option_models:' + 2].length, 0);
                 assert.equal(redis.store['option:option_models:' + 3].length, 0);
+                
+                assert.equal(redis.store['testmodel:model_options' + test_schema_1.id], undefined);
                 
                 done();
             }).catch(done);

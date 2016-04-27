@@ -18,7 +18,7 @@ var test_model = {
         
         user_id: keys.one_to_one_key('user:user_model:'),
         
-        options_ids: keys.many_to_many_key('option:option_models:')
+        options_ids: keys.many_to_many_key('option:option_models:', 'testmodel:model_options:')
     },
 
     functions: []

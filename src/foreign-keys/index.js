@@ -13,7 +13,7 @@ module.exports = {
         return new OneToManyKey(key, null);
     },
     
-    many_to_many_key: function (key) {
-        return new ManyToManyKey(key, null);
+    many_to_many_key: function (key, dkey) {
+        return new ManyToManyKey(key, dkey, null);
     }
 };
