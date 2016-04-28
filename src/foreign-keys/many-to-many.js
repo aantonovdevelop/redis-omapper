@@ -30,6 +30,8 @@ class ManyToManyKey extends ForeignKey {
         }
 
         function update_dkey(values) {
+            if (values.length <= 0) return Promise.resolve();
+            
             return new Promise((resolve, reject) => {
                 self.redis.multi()
                     .del(self.dkey + modelVal)
