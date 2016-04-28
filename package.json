@@ -1,6 +1,6 @@
 {
   "name": "@aantonov/redis-omapper",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Redis Object Mapper",
   "main": "index.js",
   "scripts": {
