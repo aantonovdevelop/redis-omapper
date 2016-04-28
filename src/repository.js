@@ -28,12 +28,27 @@ function Repository (model_schema, worker, redis) {
         var self = this;
 
         return new Promise(function (resolve, reject) {
-            return worker.get_model(self.model_schema.key + id).then((schema) => {
+            return worker.get_model(self.model_schema.key + id).then(get_many_to_many_foreign_values).then((schema) => {
                 var result_model = model_factory(schema, model_schema);
                 
                 resolve(result_model);
             }).catch(reject);
         });
+        
+        function get_many_to_many_foreign_values(schema) {
+            var indexes = self.model_schema.indexes;
+            var p = [];
+            
+            Object.keys(indexes).forEach((field) => {
+                if (indexes[field].constructor.name === 'ManyToManyKey') {
+                    p.push(indexes[field].get_depended_values(schema.id).then((values) => {
+                        schema[field] = values;
+                    }));
+                }
+            });
+            
+            return Promise.all(p).then(() => Promise.resolve(schema));
+        }
     };
 
     /**

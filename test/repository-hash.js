@@ -42,6 +42,15 @@ describe('Repository', function () {
             redis.store = [];
 
             redis.store['testmodel:info:1'] = test_schema_1;
+            
+            redis.store['company:company_models:1'] = [1];
+            redis.store['user:user_models:1'] = [1];
+            
+            redis.store['option:option_models:1'] = [1];
+            redis.store['option:option_models:2'] = [1];
+            redis.store['option:option_models:3'] = [1];
+            
+            redis.store['testmodel:model_options:1'] = [1, 2, 3];
 
             repository.get(test_schema_1.id).then((model) => {
                 assert.equal(model.id, test_schema_1.id);

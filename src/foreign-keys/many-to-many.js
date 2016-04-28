@@ -36,6 +36,16 @@ class ManyToManyKey extends ForeignKey {
         }
     }
     
+    get_depended_values(id) {
+        var self = this;
+        
+        return new Promise((resolve, reject) => {
+            self.redis.smembers(self.dkey + id, (err, values) => {
+                err ? reject(err) : resolve(values);
+            });
+        })
+    }
+    
     get_values (keyValues) {
         var self = this;
 

@@ -38,6 +38,7 @@ describe('Repository', function () {
         it('Should return model object from db', function (done) {
 
             redis.store[test_model.key + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store['testmodel:model_options:' + test_schema_1.id] = [1, 2, 3];
 
             var repository = new Repository(test_model, worker, redis);
 
@@ -96,8 +97,10 @@ describe('Repository', function () {
             redis.store = [];
           
             redis.store['testmodel:info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store['testmodel:model_options:' + test_schema_1.id] = [1, 2, 3];
 
             redis.store['testmodel:info:' + test_schema_2.id] = JSON.stringify(test_schema_2);
+            redis.store['testmodel:model_options:' + test_schema_2.id] = [1, 2, 3];
             
             redis.store['company:company_models:' + test_schema_1.company_id] = [test_schema_1.id, test_schema_2.id];
             
@@ -119,7 +122,10 @@ describe('Repository', function () {
             redis.store = [];
             
             redis.store['testmodel:info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store['testmodel:model_options:' + test_schema_1.id] = [1, 2, 3];
+            
             redis.store['testmodel:info:' + test_schema_2.id] = JSON.stringify(test_schema_2);
+            redis.store['testmodel:model_options:' + test_schema_2.id] = [1, 2, 3];
             
             redis.store['option:option_models:1'] = [test_schema_1.id, test_schema_2.id];
             redis.store['option:option_models:2'] = [test_schema_2.id];
@@ -144,7 +150,10 @@ describe('Repository', function () {
             redis.store = [];
             
             redis.store['testmodel:info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store['testmodel:model_options:' + test_schema_1.id] = [1, 2, 3];
+            
             redis.store['testmodel:info:' + test_schema_2.id] = JSON.stringify(test_schema_2);
+            redis.store['testmodel:model_options:' + test_schema_2.id] = [1, 2, 3];
             
             redis.store['company:company_models:1'] = [test_schema_2.id];
             
