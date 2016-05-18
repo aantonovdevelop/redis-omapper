@@ -21,7 +21,7 @@ function Model() {
         var result = {};
 
         Object.keys(self.fields).forEach(field =>
-            self[field] ? result[field] = self[field] : field === 'id' ? result[field] = undefined : null
+            result[field] = self[field]
         );
 
         return result;
