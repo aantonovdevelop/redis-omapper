@@ -9,10 +9,10 @@ function Model() {
 
         if (Object.keys(schema).length != Object.keys(self.fields).length) return false;
 
-        Object.keys(schema).forEach(item =>
-            Object.keys(self.fields).indexOf(item) < 0 ? result = false : null
-        );
-
+        Object.keys(self.fields).forEach(field => {
+            !this.schema.hasOwnProperty(field) ? result = false : null;
+        });
+        
         return result;
     };
 

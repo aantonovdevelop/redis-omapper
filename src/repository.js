@@ -152,6 +152,8 @@ function Repository (model_schema, worker, redis) {
         }
 
         return new Promise(function (resolve, reject) {
+            model.schema.id = model.hasOwnProperty('id') ? model.schema.id : undefined;
+            
             if (!model.check_fields()) return reject(new Error('Wrong schema'));
 
             get_id().then(function (id) {
