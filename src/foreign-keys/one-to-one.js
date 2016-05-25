@@ -47,7 +47,7 @@ class OneToOneKey extends ForeignKey {
         
         return new Promise((resolve, reject) => {
             self.redis.get(full_key, (err, res) => {
-                err ? reject(err) : resolve(res);
+                err ? reject(err) : resolve([res]);
             });
         });
     }

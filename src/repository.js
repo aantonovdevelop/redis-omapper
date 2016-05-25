@@ -296,7 +296,7 @@ function Repository (model_schema, worker, redis) {
     function get_models_by_ids(ids) {
         var self = this;
         var result = [];
-
+        
         return new Promise((resolve, reject) => {
             async.eachSeries(ids, get_model, (err) => {
                 err ? reject(err) : resolve(result);

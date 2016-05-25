@@ -118,6 +118,24 @@ describe('Repository', function () {
                 }).catch(done);
         });
         
+        it('Should return model from db by one to one index', function (done) {
+            redis.store = [];
+            
+            redis.store['testmodel:info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store['user:user_model:' + test_schema_1.user_id] = test_schema_1.id;
+            redis.store['testmodel:model_options:' + test_schema_1.id] = [];
+            
+            var repository = new Repository(test_model, worker, redis);
+            
+            repository.fetch_by('user_id', test_schema_1.user_id)
+                .then(function (model) {
+                    assert.ok(model);
+                    assert.equal(model[0].id, test_schema_1.id);
+                    
+                    done();
+                }).catch(done);
+        });
+        
         it('Should return models by many to one index', function (done) {
             redis.store = [];
             
