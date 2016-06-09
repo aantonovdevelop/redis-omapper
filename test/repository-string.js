@@ -339,4 +339,19 @@ describe('Repository', function () {
             }).catch(done);
         });
     });
+
+    describe('#update_field', function () {
+        it('Should update field of model in db', function (done) {
+            var repository = new Repository(test_model, worker, redis);
+
+            redis.store = [];
+            redis.store['testmodel:info:1'] = JSON.stringify(test_schema_1);
+
+            repository.update_field(1, 'name', 'updated_name').then(() => {
+                assert.equal(JSON.parse(redis.store['testmodel:info:1']).name, 'updated_name');
+
+                done();
+            }).catch(done);
+        });
+    });
 });

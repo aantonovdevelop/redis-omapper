@@ -34,9 +34,18 @@ module.exports = function (redis) {
             });
         },
         
-        save_field: function () {
+        save_field: function (key, field, value) {
             return new Promise((resolve, reject) => {
-                reject(new Error('Not implemented exception'));
+                redis.get(key, (err, res) => {
+                    if (err) return reject(err);
+                    
+                    let parsed = JSON.parse(res);
+                    parsed[field] = value;
+                    
+                    redis.set(key, JSON.stringify(parsed), (err) => {
+                        err ? reject(err) : resolve();
+                    });
+                });
             });
         },
         
