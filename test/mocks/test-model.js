@@ -21,7 +21,12 @@ var test_model = {
         options_ids: keys.many_to_many_key('option:option_models:', 'testmodel:model_options:')
     },
 
-    functions: []
+    functions: [{
+        name: 'get_id',
+        fn: function () {
+            return this.id;
+        }
+    }]
 };
 
 module.exports = test_model;
