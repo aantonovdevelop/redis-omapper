@@ -26,7 +26,7 @@ function model_factory (schema, model_schema) {
 }
 
 function set_model_functions(model_schema, model) {
-    model_schema.functions ? model_schema.functions.forEach(fn => model[fn.name] = fn) : null;
+    model_schema.functions ? model_schema.functions.forEach(fn => model[fn.name] = fn.fn.bind(model)) : null;
 }
 
 function set_model_fields(schema, model_schema, model) {
