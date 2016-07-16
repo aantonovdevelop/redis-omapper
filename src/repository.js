@@ -28,7 +28,7 @@ function Repository (model_schema, worker, redis) {
         var self = this;
 
         return new Promise(function (resolve, reject) {
-            return worker.get_model(self.model_schema.key + id).then(get_many_to_many_foreign_values).then((schema) => {
+            return worker.get_model(self.model_schema.key + 'info:' + id).then(get_many_to_many_foreign_values).then((schema) => {
                 var result_model = model_factory(schema, model_schema);
                 
                 resolve(result_model);
@@ -73,7 +73,7 @@ function Repository (model_schema, worker, redis) {
         
         function get_all_keys () {
             return new Promise((resolve, reject) => {
-                redis.keys(self.model_schema.key + '*', (err, keys) => {
+                redis.keys(self.model_schema.key + 'info:' + '*', (err, keys) => {
                     err ? reject(err) : resolve(keys);
                 });
             });
@@ -198,7 +198,7 @@ function Repository (model_schema, worker, redis) {
         }
 
         function save_or_update(id, schema) {
-            return worker.save_model(self.model_schema.key + id, schema)
+            return worker.save_model(self.model_schema.key + 'info:' + id, schema)
         }
 
         function save_indexes(indexes) {
@@ -219,7 +219,7 @@ function Repository (model_schema, worker, redis) {
 
         function check_updating_object_existing(id) {
             return new Promise(function (resolve, reject) {
-                redis.exists(self.model_schema.key + id, function (err, isExist) {
+                redis.exists(self.model_schema.key + 'info:' + id, function (err, isExist) {
                     if (err) return reject(err);
 
                     resolve(isExist);
@@ -239,7 +239,7 @@ function Repository (model_schema, worker, redis) {
      * @return {Promise <undefined|Error>}
      */
     this.update_field = function(id, field, value) {
-        return worker.save_field(this.model_schema.key + id, field, value);
+        return worker.save_field(this.model_schema.key + 'info:' + id, field, value);
     };
     
     /**
@@ -279,7 +279,7 @@ function Repository (model_schema, worker, redis) {
         }
         
         function delete_model(model) {
-            return worker.delete_model(self.model_schema.key + model.id)
+            return worker.delete_model(self.model_schema.key + 'info:' + model.id)
         }
     };
 
@@ -324,7 +324,7 @@ function Repository (model_schema, worker, redis) {
     function ids_to_keys (ids) {
         var keys = [];
         
-        ids.forEach((id) => keys.push(this.model_schema.key + id));
+        ids.forEach((id) => keys.push(this.model_schema.key + 'info:' + id));
         
         return keys;
     }
