@@ -3,7 +3,7 @@
 var keys = require('../../src/foreign-keys');
 
 var test_model = {
-    key: 'testmodel:info:',
+    key: 'testmodel:',
 
     fields: {
         id: 'Number',

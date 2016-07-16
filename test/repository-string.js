@@ -37,7 +37,7 @@ describe('Repository', function () {
     describe('#get', function () {
         it('Should return model object from db', function (done) {
 
-            redis.store[test_model.key + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store[test_model.key + 'info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
             redis.store['testmodel:model_options:' + test_schema_1.id] = [1, 2, 3];
 
             var repository = new Repository(test_model, worker, redis);
@@ -57,8 +57,8 @@ describe('Repository', function () {
     
     describe('#get_all', function () {
         it('Should return all models', function (done) {
-            redis.store[test_model.key + test_schema_1.id] = JSON.stringify(test_schema_1);
-            redis.store[test_model.key + test_schema_2.id] = JSON.stringify(test_schema_2);
+            redis.store[test_model.key + 'info:' + test_schema_1.id] = JSON.stringify(test_schema_1);
+            redis.store[test_model.key + 'info:' + test_schema_2.id] = JSON.stringify(test_schema_2);
             
             var repository = new Repository(test_model, worker, redis);
             
@@ -206,7 +206,7 @@ describe('Repository', function () {
             repository.save(test_schema_3).then(function (id) {
                 assert.equal(id, 1);
 
-                assert.equal(JSON.parse(redis.store[test_model.key + id]).id, 1);
+                assert.equal(JSON.parse(redis.store[test_model.key + 'info:' + id]).id, 1);
 
                 assert.equal(redis.store['company:company_models:' + test_schema_1.company_id][0], id);
                 

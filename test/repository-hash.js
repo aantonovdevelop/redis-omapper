@@ -83,8 +83,8 @@ describe('Repository', function () {
         it('Should return all models', function (done) {
             redis.store =  [];
             
-            redis.store[test_model.key + test_schema_1.id] = test_schema_1;
-            redis.store[test_model.key + test_schema_2.id] = test_schema_2;
+            redis.store[test_model.key + 'info:' + test_schema_1.id] = test_schema_1;
+            redis.store[test_model.key + 'info:' + test_schema_2.id] = test_schema_2;
 
             var repository = new Repository(test_model, worker, redis);
 
