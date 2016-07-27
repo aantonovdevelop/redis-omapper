@@ -55,6 +55,11 @@ module.exports = function (redis) {
                     err ? reject(err) : resolve();
                 });
             });
+        },
+        
+        increment: function () {
+            //TODO implement increment function for string repository
+            return Promise.reject(new Error('Not implemented exception'));
         }
     }
 };

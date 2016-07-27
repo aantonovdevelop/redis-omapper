@@ -93,6 +93,14 @@ module.exports = function (redis) {
                     err ? reject(err) : resolve();
                 });
             });
+        },
+        
+        increment: function (key, field, value) {
+            return new Promise((resolve, reject) => {
+                redis.hincrby(key, field, value, (err, res) => {
+                    err ? reject(err) : resolve(res);
+                });
+            });
         }
     }
 };

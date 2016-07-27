@@ -142,4 +142,25 @@ describe('Repository', function () {
             }).catch(done);
         })
     });
+    
+    describe('#increment_field', function () {
+        it('Should increment and decrement object field', function (done) {
+            var repository = new Repository(test_model, worker, redis);
+            
+            redis.store = [];
+            redis.store['testmodel:info:1'] = test_schema_1;
+            
+            repository.increment_field(1, 'user_id', 10)
+                .then(result => {
+                    assert.equal(result, 11);
+                    
+                    repository.increment_field(1, 'user_id', -3)
+                        .then(result => {
+                            assert.equal(result, 8);
+                            
+                            done();
+                        }).catch(err => done(err));
+                }).catch(err => done(err));
+        });
+    });
 });
