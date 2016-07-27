@@ -284,6 +284,19 @@ function Repository (model_schema, worker, redis) {
     };
 
     /**
+     * Increment object field by value
+     * 
+     * @param {Number} id Object id
+     * @param {String} field Field name
+     * @param {Number} value Neg or Pos number
+     * 
+     * @returns {*}
+     */
+    this.increment_field = function (id, field, value) {
+        return worker.increment(this.model_schema.key + 'info:' + id, field, value);
+    };
+
+    /**
      * Private functions
      */
 
