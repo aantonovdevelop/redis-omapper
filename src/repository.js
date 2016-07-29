@@ -239,7 +239,12 @@ function Repository (model_schema, worker, redis) {
      * @return {Promise <undefined|Error>}
      */
     this.update_field = function(id, field, value) {
-        return worker.save_field(this.model_schema.key + 'info:' + id, field, value);
+        return worker.save_field(this.model_schema.key + 'info:' + id, field, value).then(() => {
+            if (this.model_schema.indexes[field])
+                return this.model_schema.indexes[field].update_key(id, value);
+
+            return Promise.resolve();
+        });
     };
     
     /**

@@ -353,5 +353,19 @@ describe('Repository', function () {
                 done();
             }).catch(done);
         });
+
+        it('Should update foreign key of model in db', function (done) {
+            redis.store = [];
+
+            var repository = new Repository(test_model, worker, redis);
+
+            redis.store['testmodel:info:1'] = JSON.stringify(test_schema_1);
+
+            repository.update_field(1, 'user_id', 4).then(() => {
+                assert.equal(redis.store['user:user_model:1'], 4);
+
+                done();
+            }).catch(done);
+        });
     });
 });
