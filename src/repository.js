@@ -1,3 +1,5 @@
+"use strict";
+
 var async = require('async');
 
 var model_factory = require('./model-factory');
