@@ -135,6 +135,10 @@ describe('Repository', function () {
             redis.store = [];
             redis.store['testmodel:info:1'] = test_schema_1;
             
+            redis.store['option:option_models:1'] = [1];
+            redis.store['option:option_models:2'] = [1];
+            redis.store['option:option_models:3'] = [1];
+            
             repository.update_field(1, 'options_ids', [1, 2, 3, 4, 5]).then(() => {
                 assert.equal(redis.store['testmodel:info:1'].options_ids, "[1,2,3,4,5]");
                 

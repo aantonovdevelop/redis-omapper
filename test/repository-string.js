@@ -354,7 +354,7 @@ describe('Repository', function () {
             }).catch(done);
         });
 
-        it('Should update foreign key of model in db', function (done) {
+        it('Should update one-to-one foreign key of model in db', function (done) {
             redis.store = [];
 
             var repository = new Repository(test_model, worker, redis);
@@ -362,10 +362,29 @@ describe('Repository', function () {
             redis.store['testmodel:info:1'] = JSON.stringify(test_schema_1);
 
             repository.update_field(1, 'user_id', 4).then(() => {
-                assert.equal(redis.store['user:user_model:1'], 4);
+                assert.equal(redis.store['user:user_model:4'], 1);
 
                 done();
             }).catch(done);
+        });
+        
+        it('Should update one-to-many foreign key of model in db', function (done) {
+            redis.store = [];
+            
+            var repository = new Repository(test_model, worker, redis);
+            
+            repository.save(test_schema_3).then(id => {
+                assert.equal(redis.store['company:company_models:' + test_schema_3.company_id][0], id);
+                
+                return repository.update_field(1, 'company_id', 2).then(() => {
+                    assert.equal(redis.store['company:company_models:' + test_schema_3.company_id].length, 0);
+                    
+                    assert.equal(redis.store['company:company_models:2'].length, 1);
+                    assert.equal(redis.store['company:company_models:2'][0], id);
+                    
+                    return Promise.resolve();
+                });
+            }).then(done).catch(done);
         });
     });
 });
