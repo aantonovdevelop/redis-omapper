@@ -149,7 +149,7 @@ describe('Repository', function () {
             var repository = new Repository(test_model, worker, redis);
 
             redis.store = [];
-            redis.store['testmodel:info:1'] = test_schema_1;
+            redis.store['testmodel:info:1'] = Object.assign({}, test_schema_1);
 
             redis.store['option:option_models:1'] = [1];
             redis.store['option:option_models:2'] = [1];
@@ -158,14 +158,17 @@ describe('Repository', function () {
             redis.store['user:user_model:1'] = 1;
             redis.store['company:company_models:1'] = [1];
 
-            repository.update_field(test_schema_1.id, 'user_id', null).then(() => {
-                assert.equal(redis.store['user:user_model:1'], null);
-                assert.equal(redis.store['company:company_models:1'].length, 0);
+            repository.update_field(test_schema_1.id, 'user_id', null)
+                .then(() => repository.update_field(test_schema_1.id, 'company_id', null))
+                .then(() => {
+                    assert.equal(redis.store['user:user_model:1'], null);
+                    assert.equal(redis.store['company:company_models:1'].length, 0);
 
-                done();
-            }).catch(err => {
-                done(err);
-            });
+                    done();
+                })
+                .catch(err => {
+                    done(err);
+                });
         });
     });
     
