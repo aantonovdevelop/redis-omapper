@@ -80,11 +80,19 @@ module.exports = function (redis) {
             
             return new Promise((resolve, reject) => {
                 var val = (self.model_schema.fields[field] === 'Array') ? JSON.stringify(value) : value;
-                
-                redis.hset(key, field, val, (err) => {
-                    err ? reject(err) : resolve();
-                });
+
+                let cb = ((err) => { err ? reject(err) : resolve(); }),
+                    operation = value ? update_field.bind({}, key, field, val, cb) : remove_field.bind({}, key, field, cb);
+
+                operation();
             });
+
+            function update_field (key, field, val, cb) {
+                redis.hset(key, field, val, cb);
+            }
+            function remove_field (key, field, cb) {
+                redis.hdel(key, field, cb);
+            }
         },
 
         delete_model: function (key) {

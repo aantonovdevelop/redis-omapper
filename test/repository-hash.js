@@ -141,10 +141,32 @@ describe('Repository', function () {
             
             repository.update_field(1, 'options_ids', [1, 2, 3, 4, 5]).then(() => {
                 assert.equal(redis.store['testmodel:info:1'].options_ids, "[1,2,3,4,5]");
-                
                 done();
             }).catch(done);
-        })
+        });
+
+        it('Should delete foreign key if index field set as null', function (done) {
+            var repository = new Repository(test_model, worker, redis);
+
+            redis.store = [];
+            redis.store['testmodel:info:1'] = test_schema_1;
+
+            redis.store['option:option_models:1'] = [1];
+            redis.store['option:option_models:2'] = [1];
+            redis.store['option:option_models:3'] = [1];
+
+            redis.store['user:user_model:1'] = 1;
+            redis.store['company:company_models:1'] = [1];
+
+            repository.update_field(test_schema_1.id, 'user_id', null).then(() => {
+                assert.equal(redis.store['user:user_model:1'], null);
+                assert.equal(redis.store['company:company_models:1'].length, 0);
+
+                done();
+            }).catch(err => {
+                done(err);
+            });
+        });
     });
     
     describe('#increment_field', function () {
