@@ -1,6 +1,7 @@
 "use strict";
 
-var async = require('async');
+var async = require('async'),
+    iterate = require('./iterator');
 
 var model_factory = require('./model-factory');
 
@@ -106,33 +107,55 @@ function Repository (model_schema, worker, redis) {
     /**
      * Fetch models by many indexes
      * 
-     * @param {Array} fetchindexes
+     * @param {Array} fetchIndexes
+     * @param {String <"i"|"u"|"d">} type
+     *
      * @returns {Promise <Array|Error>}
      */
-    this.fetch_by_many = function (fetchindexes) {
-        var self = this;
-        var result_keys = [];
-        var indexes = self.model_schema.indexes;
+    this.fetch_by_many = function (fetchIndexes, type = "i") {
+        var result_keys = [],
+            indexes = this.model_schema.indexes;
 
-        return new Promise((resolve, reject) => {
-            get_models_ids().then(get_models_by_ids.bind(self)).then(resolve).catch(reject);
-        });
-        
+        return get_models_ids().then(get_models_by_ids.bind(this));
+
         function get_models_ids () {
+            function get_index_keys (index) {
+                return indexes[index.name].get_keys(index.key_values)
+                    .then(keys => result_keys = result_keys.concat(keys));
+            }
+
+            return iterate(fetchIndexes, get_index_keys)
+                .then(() => {
+                    if (type === "u") {
+                        return sunion(result_keys);
+                    } else if (type === "d") {
+                        return sdiff(result_keys);
+                    } else {
+                        return sinter(result_keys);
+                    }
+                });
+        }
+
+        function sinter(keys) {
             return new Promise((resolve, reject) => {
-                async.eachSeries(fetchindexes, (fetchindex, callback) => {
-                    indexes[fetchindex.name].get_keys(fetchindex.key_values)
-                        .then((keys) => {
-                            result_keys = result_keys.concat(keys);
+                redis.sinter(keys, (err, ids) => {
+                    err ? reject(err) : resolve(ids);
+                });
+            });
+        }
 
-                            callback();
-                        }).catch(callback);
-                }, (err) => {
-                    if (err) return reject(err);
+        function sunion(keys) {
+            return new Promise((resolve, reject) => {
+                redis.sunion(keys, (err, ids) => {
+                    err ? reject(err) : resolve(ids);
+                });
+            });
+        }
 
-                    redis.sinter(result_keys, (err, ids) => {
-                        err ? reject(err) : resolve(ids);
-                    });
+        function sdiff(keys) {
+            return new Promise((resolve, reject) => {
+                redis.sdiff(keys, (err, ids) => {
+                    err ? reject(err) : resolve(ids);
                 });
             });
         }
