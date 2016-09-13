@@ -109,14 +109,20 @@ function Repository (model_schema, worker, redis) {
      * 
      * @param {Array} fetchIndexes
      * @param {String <"i"|"u"|"d">} type
+     * @param {Boolean} fetchModels
      *
      * @returns {Promise <Array|Error>}
      */
-    this.fetch_by_many = function (fetchIndexes, type = "i") {
+    this.fetch_by_many = function (fetchIndexes, type = "i", fetchModels = true) {
         var result_keys = [],
             indexes = this.model_schema.indexes;
 
-        return get_models_ids().then(get_models_by_ids.bind(this));
+        return get_models_ids().then(ids => {
+            if (fetchModels)
+                return get_models_by_ids.call(this, ids);
+            else
+                return Promise.resolve(ids);
+        });
 
         function get_models_ids () {
             function get_index_keys (index) {
