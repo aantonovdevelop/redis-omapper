@@ -2,6 +2,7 @@
 
 var async = require('async');
 var ForeignKey = require('./foreign-key');
+var _ = require('underscore');
 
 class ManyToManyKey extends ForeignKey {
     
@@ -22,8 +23,31 @@ class ManyToManyKey extends ForeignKey {
             p.push(add_value_to_key(value));
         });
         
-        return Promise.all(p).then(() => update_dkey(keyValues));
-        
+        return Promise.all(p)
+            .then(get_previously_keys)
+            .then(update_second_keys)
+            .then(() => update_dkey(keyValues));
+
+        function get_previously_keys() {
+            return new Promise((resolve, reject) => {
+                self.redis.smembers(self.dkey + model_value, (err, keys) => {
+                    err ? reject(err) : resolve(keys ? keys : []);
+                });
+            });
+        }
+
+        function update_second_keys(old) {
+            return new Promise((resolve, reject) => {
+               let keys = _.difference(old, keyValues);
+
+                async.eachSeries(keys, (key, callback) => {
+                    self.redis.srem(self.key + key, model_value, err => err ? callback(err) : callback());
+                }, err => {
+                    err ? reject(err) : resolve();
+                });
+            });
+        }
+
         function add_value_to_key(value) {
             return new Promise((resolve, reject) => {
                 self.redis.sadd(self.key + value, model_value, (err) => err ? reject(err) : resolve());

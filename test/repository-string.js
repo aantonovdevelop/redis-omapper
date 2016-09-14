@@ -258,6 +258,10 @@ describe('Repository', function () {
             redis.store['testmodel:info:' + test_schema_id] = JSON.stringify(test_schema_1);
             redis.store['testmodel:model_options:' + test_schema_id] = test_schema_1.options_ids;
 
+            redis.store['option:option_models:1'] = [1];
+            redis.store['option:option_models:2'] = [1];
+            redis.store['option:option_models:3'] = [1];
+
             var repository = new Repository(test_model, worker, redis);
 
             repository.save(updated_test_schema).then(function (id) {
@@ -265,7 +269,11 @@ describe('Repository', function () {
 
                 assert.equal(JSON.parse(redis.store['testmodel:info:' + test_schema_id]).id, test_schema_id);
                 assert.equal(JSON.parse(redis.store['testmodel:info:' + test_schema_id]).name, updated_test_schema.name);
-                
+
+                assert.equal(redis.store['option:option_models:1'][0], 1);
+                assert.equal(redis.store['option:option_models:2'].length, 0);
+                assert.equal(redis.store['option:option_models:3'].length, 0);
+
                 assert.equal(redis.store['testmodel:model_options:' + test_schema_id].length, 1);
 
                 done();
