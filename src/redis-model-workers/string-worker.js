@@ -12,6 +12,8 @@ module.exports = function (redis) {
         
         get_many: function (keys) {
             return new Promise((resolve, reject) => {
+                if (!keys.length) return resolve([]);
+
                 redis.mget(keys, (err, models) => {
                     err ? reject(err) : resolve(parse_models(models));
                     
