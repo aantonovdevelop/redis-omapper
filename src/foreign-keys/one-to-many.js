@@ -25,11 +25,12 @@ class OneToManyKey extends ForeignKey {
      * @returns {Promise}
      */
     update_key (keyVal, modelVal) {
-        var self = this;
-        var full_key = self.key + keyVal;
+        var self = this,
+            full_key = self.key + keyVal,
+            model_value = Number(modelVal);
         
         return new Promise((resolve, reject) => {
-            self.redis.sadd(full_key, modelVal, (err) => {
+            self.redis.sadd(full_key, model_value, (err) => {
                 err ? reject(err) : resolve();
             });
         });
@@ -42,8 +43,8 @@ class OneToManyKey extends ForeignKey {
      * @returns {Promise}
      */
     get_values (keyVal) {
-        var self = this;
-        var full_key = self.key + keyVal;
+        var self = this,
+            full_key = self.key + keyVal;
         
         return new Promise((resolve, reject) => {
             self.redis.smembers(full_key, (err, res) => {
@@ -60,8 +61,8 @@ class OneToManyKey extends ForeignKey {
      * @returns {Promise}
      */
     delete_key (keyVal, modelVal) {
-        var self = this;
-        var full_key = self.key + keyVal;
+        var self = this,
+            full_key = self.key + keyVal;
         
         return new Promise((resolve, reject) => {
             self.redis.srem(full_key, modelVal, (err) => {

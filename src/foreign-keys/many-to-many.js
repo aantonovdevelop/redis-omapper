@@ -14,9 +14,10 @@ class ManyToManyKey extends ForeignKey {
     }
     
     update_key (keyValues, modelVal) {
-        var self = this;
-        var p = [];
-        
+        var self = this,
+            p = [],
+            model_value = Number(modelVal);
+
         keyValues.forEach(value => {
             p.push(add_value_to_key(value));
         });
@@ -25,7 +26,7 @@ class ManyToManyKey extends ForeignKey {
         
         function add_value_to_key(value) {
             return new Promise((resolve, reject) => {
-                self.redis.sadd(self.key + value, modelVal, (err) => err ? reject(err) : resolve());
+                self.redis.sadd(self.key + value, model_value, (err) => err ? reject(err) : resolve());
             });
         }
 
@@ -34,8 +35,8 @@ class ManyToManyKey extends ForeignKey {
             
             return new Promise((resolve, reject) => {
                 self.redis.multi()
-                    .del(self.dkey + modelVal)
-                    .sadd(self.dkey + modelVal, values)
+                    .del(self.dkey + model_value)
+                    .sadd(self.dkey + model_value, values)
                     .exec_atomic((err) => {
                         err ? reject(err) : resolve();
                     });
