@@ -13,7 +13,14 @@ class ManyToManyKey extends ForeignKey {
         this.dkey = dkey;
         this.redis = redis;
     }
-    
+
+    /**
+     *
+     * @param {Array} keyValues
+     * @param {Number} modelVal
+     *
+     * @returns {Promise}
+     */
     update_key (keyValues, modelVal) {
         var self = this,
             p = [],
@@ -67,36 +74,40 @@ class ManyToManyKey extends ForeignKey {
             });
         }
     }
-    
+
+    /**
+     *
+     * @param {Number} id
+     * @returns {Promise}
+     */
     get_depended_values(id) {
-        var self = this;
-        
         return new Promise((resolve, reject) => {
-            self.redis.smembers(self.dkey + id, (err, values) => {
+            this.redis.smembers(this.dkey + id, (err, values) => {
                 err ? reject(err) : resolve(values);
             });
         })
     }
-    
+
+    /**
+     *
+     * @param {Array} keyValues
+     * @returns {Promise}
+     */
     get_values (keyValues) {
-        var self = this;
+        const key_values = keyValues || [];
 
         return new Promise((resolve, reject) => {
-            self.redis.sinter(generate_full_keys(keyValues), (err, res) => 
+            this.redis.sinter(generate_full_keys(this.key, key_values), (err, res) =>
                 err ? reject(err) : resolve(res));
         });
-        
-        function generate_full_keys(values) {
-            var full_keys = [];
-
-            values.forEach((values) => {
-                full_keys.push(self.key + values);
-            });
-
-            return full_keys;
-        }
     }
-    
+
+    /**
+     *
+     * @param {Array} keyValues
+     * @param {Number} modelVal
+     * @returns {Promise}
+     */
     delete_key (keyValues, modelVal) {
         var self = this;
         
@@ -114,24 +125,33 @@ class ManyToManyKey extends ForeignKey {
             });
         }
     }
-    
+
+    /**
+     *
+     * @param {Array} keyValues
+     * @returns {Promise}
+     */
     get_keys (keyValues) {
-        var self = this;
-        
-        return new Promise((resolve) => {
-            resolve(generate_full_keys(keyValues));
-        });
-        
-        function generate_full_keys(values) {
-            var full_keys = [];
-            
-            values.forEach((value) => {
-                full_keys.push(self.key + value);
-            });
-            
-            return full_keys;
-        }
+        const key_values = keyValues || [];
+
+        return Promise.resolve(generate_full_keys(this.key, key_values));
     }
+}
+
+/**
+ *
+ * @param key
+ * @param values
+ * @returns {Array}
+ */
+function generate_full_keys(key, values) {
+    if (!(values instanceof Array)) throw new Error("Wrong values argument type");
+
+    let full_keys = [];
+
+    values.forEach(values => full_keys.push(key + values));
+
+    return full_keys;
 }
 
 module.exports = ManyToManyKey;
