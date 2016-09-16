@@ -29,7 +29,7 @@ class OneToManyKey extends ForeignKey {
             full_key = self.key + keyVal,
             model_value = Number(modelVal);
         
-        return remove_previous.call(this, modelVal)
+        return remove_previous.call(this, model_value)
             .then(save_key.call(this, full_key, model_value))
             .then(() => save_meta.call(this, keyVal));
 
