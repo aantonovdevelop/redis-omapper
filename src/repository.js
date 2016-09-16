@@ -92,16 +92,11 @@ function Repository (model_schema, worker, redis) {
      * @returns {Promise <Array|Error>}
      */
     this.fetch_by = function (indexname, id) {
-        var self = this;
+        var index = this.model_schema.indexes[indexname];
 
-        return new Promise((resolve, reject) => {
-            var index = self.model_schema.indexes[indexname];
-            
-            index.get_values(id)
-                .then(get_models_by_ids.bind(self))
-                .then(resolve).catch(reject);
+        return index.get_values(id).then(ids => {
+            return worker.get_many(ids_to_keys.bind(this)(ids))
         });
-
     };
 
     /**
