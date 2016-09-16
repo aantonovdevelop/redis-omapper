@@ -30,10 +30,10 @@ class OneToOneKey extends ForeignKey {
 
         return remove_previous.call(this)
             .then(save_key.call(this, full_key, model_value))
-            .then(() => save_metha.call(this, keyVal));
+            .then(() => save_meta.call(this, keyVal));
 
         function remove_previous() {
-            return get_metha.call(this)
+            return get_meta.call(this)
                 .then(val => {
                     this.redis.del(this.key + val, err => {
                         if (err) return Promise.reject(err);
@@ -44,24 +44,24 @@ class OneToOneKey extends ForeignKey {
 
         function save_key (key, val) {
             return new Promise ((resolve, reject) => {
-                this.redis.set(key, val, (err) => {
+                this.redis.set(key, Number(val), (err) => {
                     err ? reject(err) : resolve();
                 });
             });
         }
 
-        function save_metha(val) {
+        function save_meta(val) {
             return new Promise((resolve, reject) => {
-                this.redis.set(this.id, val, (err) => {
+                this.redis.set(this.id, Number(val), (err) => {
                     err ? reject(err) : resolve();
                 });
             });
         }
 
-        function get_metha() {
+        function get_meta() {
             return new Promise((resolve, reject) => {
                 this.redis.get(this.id, (err, val) => {
-                    err ? reject(err) : resolve(val);
+                    err ? reject(err) : resolve(val ? Number(val) : val);
                 });
             });
         }
