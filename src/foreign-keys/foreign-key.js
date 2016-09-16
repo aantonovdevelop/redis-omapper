@@ -1,6 +1,12 @@
 'use strict';
 
+const random = require('rand-token');
+
 class ForeignKey {
+    constructor () {
+        this.id = random.generate(16);
+    }
+
     update_key (key, value) {
         throw new Error('Not implemented exception');
     }

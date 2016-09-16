@@ -12,7 +12,7 @@ class OneToOneKey extends ForeignKey {
      */
     constructor (key, redis) {
         super();
-        
+
         this.key = key;
         this.redis = redis;
     }
@@ -25,15 +25,46 @@ class OneToOneKey extends ForeignKey {
      * @returns {Promise}
      */
     update_key (keyVal, modelVal) {
-        var self = this,
-            full_key = self.key + keyVal,
+        var full_key = this.key + keyVal,
             model_value = Number(modelVal);
-        
-        return new Promise ((resolve, reject) => {
-            self.redis.set(full_key, model_value, (err) => {
-                err ? reject(err) : resolve();
+
+        return remove_previous.call(this)
+            .then(save_key.call(this, full_key, model_value))
+            .then(() => save_metha.call(this, keyVal));
+
+        function remove_previous() {
+            return get_metha.call(this)
+                .then(val => {
+                    this.redis.del(this.key + val, err => {
+                        if (err) return Promise.reject(err);
+                        else return Promise.resolve();
+                    });
+                });
+        }
+
+        function save_key (key, val) {
+            return new Promise ((resolve, reject) => {
+                this.redis.set(key, val, (err) => {
+                    err ? reject(err) : resolve();
+                });
             });
-        });
+        }
+
+        function save_metha(val) {
+            return new Promise((resolve, reject) => {
+                this.redis.set(this.id, val, (err) => {
+                    err ? reject(err) : resolve();
+                });
+            });
+        }
+
+        function get_metha() {
+            return new Promise((resolve, reject) => {
+                this.redis.get(this.id, (err, val) => {
+                    err ? reject(err) : resolve(val);
+                });
+            });
+        }
     }
     
     /**
