@@ -18,10 +18,11 @@ class ManyToManyKey extends ForeignKey {
      *
      * @param {Array} keyValues
      * @param {Number} modelVal
+     * @param {Boolean} isUpdate
      *
      * @returns {Promise}
      */
-    update_key (keyValues, modelVal) {
+    update_key (keyValues, modelVal, isUpdate = true) {
         var self = this,
             p = [],
             model_value = Number(modelVal);
@@ -31,14 +32,14 @@ class ManyToManyKey extends ForeignKey {
         });
         
         return Promise.all(p)
-            .then(get_previously_keys)
-            .then(update_second_keys)
+            .then(() => isUpdate ? get_previously_keys() : Promise.resolve())
+            .then(old => isUpdate ? update_second_keys(old) : Promise.resolve())
             .then(() => update_dkey(keyValues));
 
         function get_previously_keys() {
             return new Promise((resolve, reject) => {
                 self.redis.smembers(self.dkey + model_value, (err, keys) => {
-                    err ? reject(err) : resolve(keys ? keys : []);
+                    err ? reject(err) : resolve(keys ? keys.slice() : []);
                 });
             });
         }
@@ -63,7 +64,9 @@ class ManyToManyKey extends ForeignKey {
 
         function update_dkey(values) {
             if (values.length <= 0) return Promise.resolve();
-            
+
+            values = values.slice();
+
             return new Promise((resolve, reject) => {
                 self.redis.multi()
                     .del(self.dkey + model_value)

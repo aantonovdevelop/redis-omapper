@@ -22,16 +22,23 @@ class OneToManyKey extends ForeignKey {
      * 
      * @param keyVal
      * @param modelVal
+     * @param isUpdate
+     *
      * @returns {Promise}
      */
-    update_key (keyVal, modelVal) {
+    update_key (keyVal, modelVal, isUpdate = true) {
         var self = this,
             full_key = self.key + keyVal,
             model_value = Number(modelVal);
         
-        return remove_previous.call(this, model_value)
-            .then(save_key.call(this, full_key, model_value))
-            .then(() => save_meta.call(this, keyVal));
+
+        if (isUpdate) {
+            return remove_previous.call(this, model_value)
+                .then(() => save_key.call(this, full_key, model_value))
+                .then(() => save_meta.call(this, keyVal));
+        } else {
+            return save_key.call(this, full_key, model_value).then(() => save_meta.call(this, keyVal));
+        }
 
         function remove_previous(id) {
             return get_meta.call(this)

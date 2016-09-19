@@ -17,6 +17,7 @@ var model_factory = require('./model-factory');
 function Repository (model_schema, worker, redis) {
     
     this.model_schema = model_schema;
+    this.redis = redis;
     worker.model_schema = model_schema;
     
     bind_redis_to_foreign_keys.call(this);
@@ -95,7 +96,7 @@ function Repository (model_schema, worker, redis) {
         var index = this.model_schema.indexes[indexname];
 
         return index.get_values(id).then(ids => {
-            return worker.get_many(ids_to_keys.bind(this)(ids))
+            return get_models_by_ids.call(this, ids);
         });
     };
 
@@ -238,7 +239,7 @@ function Repository (model_schema, worker, redis) {
             });
 
             function update_index(index, callback) {
-                indexes[index].update_key(model.schema[index], model.id)
+                indexes[index].update_key(model.schema[index], model.id, isUpdate)
                     .then(callback, callback);
             }
         }
